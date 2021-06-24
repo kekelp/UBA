@@ -1,0 +1,155 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://UI/ui_host/ui_host.gd" type="Script" id=1]
+[ext_resource path="res://UI/ui_host/gamemode_option_button.gd" type="Script" id=2]
+
+[node name="host_ui" type="CanvasLayer"]
+layer = 3
+script = ExtResource( 1 )
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -193.0
+margin_bottom = 1080.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 20
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 183.0
+margin_bottom = 1060.0
+custom_constants/separation = 7
+
+[node name="hide_button" type="Button" parent="MarginContainer/VBoxContainer"]
+margin_right = 173.0
+margin_bottom = 20.0
+text = "HIDE"
+
+[node name="options_vbox" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+margin_top = 27.0
+margin_right = 173.0
+margin_bottom = 290.0
+custom_constants/separation = 7
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/options_vbox"]
+margin_right = 173.0
+margin_bottom = 73.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/options_vbox/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 166.0
+margin_bottom = 66.0
+custom_constants/margin_right = 7
+custom_constants/margin_top = 7
+custom_constants/margin_left = 7
+custom_constants/margin_bottom = 7
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/options_vbox/PanelContainer/MarginContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 152.0
+margin_bottom = 52.0
+custom_constants/separation = 7
+
+[node name="room_code_label" type="Label" parent="MarginContainer/VBoxContainer/options_vbox/PanelContainer/MarginContainer/VBoxContainer"]
+margin_right = 145.0
+margin_bottom = 14.0
+text = "room code:"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="room_code_lineedit" type="LineEdit" parent="MarginContainer/VBoxContainer/options_vbox/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 21.0
+margin_right = 145.0
+margin_bottom = 45.0
+text = "asiuhgalg"
+align = 1
+editable = false
+
+[node name="gamemode_panel_container" type="PanelContainer" parent="MarginContainer/VBoxContainer/options_vbox"]
+margin_top = 80.0
+margin_right = 173.0
+margin_bottom = 236.0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 166.0
+margin_bottom = 149.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 154.0
+margin_bottom = 137.0
+custom_constants/separation = 10
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer"]
+margin_right = 149.0
+margin_bottom = 14.0
+text = "START MATCH"
+align = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer"]
+margin_top = 24.0
+margin_right = 149.0
+margin_bottom = 38.0
+text = "GAME MODE:"
+
+[node name="gamemode_option_button" type="OptionButton" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer"]
+margin_top = 48.0
+margin_right = 149.0
+margin_bottom = 68.0
+script = ExtResource( 2 )
+
+[node name="elimination_hbox" type="HBoxContainer" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer"]
+margin_top = 78.0
+margin_right = 149.0
+margin_bottom = 102.0
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer/elimination_hbox"]
+margin_top = 5.0
+margin_right = 71.0
+margin_bottom = 19.0
+text = "MAX LIVES:"
+
+[node name="elimination_lives_spinbox" type="SpinBox" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer/elimination_hbox"]
+margin_left = 75.0
+margin_right = 149.0
+margin_bottom = 24.0
+value = 5.0
+align = 1
+
+[node name="start_game_button" type="Button" parent="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer"]
+margin_top = 112.0
+margin_right = 149.0
+margin_bottom = 132.0
+text = "START"
+
+[node name="quit_button" type="Button" parent="MarginContainer/VBoxContainer/options_vbox"]
+margin_top = 243.0
+margin_right = 173.0
+margin_bottom = 263.0
+text = "QUIT"
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/hide_button" to="." method="_on_hide_button_pressed"]
+[connection signal="value_changed" from="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer/elimination_hbox/elimination_lives_spinbox" to="." method="_on_elimination_lives_spinbox_value_changed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/options_vbox/gamemode_panel_container/MarginContainer/VBoxContainer/start_game_button" to="." method="_on_start_game_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/options_vbox/quit_button" to="." method="_on_quit_button_pressed"]

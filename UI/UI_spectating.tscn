@@ -1,0 +1,23 @@
+[gd_scene format=2]
+
+[node name="UI_spectating" type="CanvasLayer"]
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -39.0
+margin_right = 39.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="MarginContainer" groups=[
+"UI_spectating",
+]]
+visible = false
+margin_top = 13.0
+margin_right = 78.0
+margin_bottom = 27.0
+text = "SPECTATING"
+align = 1

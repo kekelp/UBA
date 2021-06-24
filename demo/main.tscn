@@ -1,0 +1,87 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://character/character.tscn" type="PackedScene" id=1]
+[ext_resource path="res://online.tscn" type="PackedScene" id=2]
+[ext_resource path="res://UI/UI-main.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Arena.tscn" type="PackedScene" id=4]
+
+[node name="main" type="Node2D"]
+
+[node name="online" parent="." groups=[
+"online",
+] instance=ExtResource( 2 )]
+
+[node name="Arena" parent="." instance=ExtResource( 4 )]
+position = Vector2( 0, 192.55 )
+
+[node name="baj" parent="." groups=[
+"owned",
+] instance=ExtResource( 1 )]
+position = Vector2( 546.182, 510.257 )
+base_name = "poggers"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ProgressBar" type="ProgressBar" parent="CanvasLayer" groups=[
+"progressbar",
+]]
+margin_left = 28.8517
+margin_top = 29.9018
+margin_right = 436.852
+margin_bottom = 89.9022
+rect_scale = Vector2( 0.887365, 0.485642 )
+value = 50.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="UI_spectating" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_spectating"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -39.0
+margin_right = 39.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="UI_spectating/MarginContainer" groups=[
+"UI_spectating",
+]]
+visible = false
+margin_top = 13.0
+margin_right = 78.0
+margin_bottom = 27.0
+text = "SPECTATING"
+align = 1
+
+[node name="UI_gamemode" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_gamemode"]
+anchor_right = 1.0
+margin_bottom = 14.0
+custom_constants/margin_right = 800
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="UI_gamemode/MarginContainer" groups=[
+"UI_gamemode",
+]]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 1120.0
+margin_bottom = 24.0
+text = "LOBBY"
+align = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="UI_main" parent="." instance=ExtResource( 3 )]
+layer = 2

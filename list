@@ -1,0 +1,151 @@
+
+AIMED PUNCHES - kinda bad
+
+DMG BUFF ON offensive_arc - mostly works
+
+ENERGY ADJ? - mostly works
+OVERSTRETCH MODE - hopefully not needed anymore
+
+DAMAGE METER - mostly works
+
+
+grab extrakick -mostly werks
+rethink tresholds for extrakick and damage - not really
+
+grab damage  -mostly werks
+
+---------------
+
+
+SPRITES and vfx
+
+colors --ok
+
+names --ok
+
+spawning --ok
+
+dying
+
+controllers
+
+----------------
+fix airborne detection
+counter-grab force ? different when either is flying?
+
+rescale bounce mod
+
+add miracle beams???
+
+change extrakick/damage to be based only on velocity component through center?
+
+different swing arcs for stances
+
+hand clashes
+3rd stance
+
+no changing stance mid-throw!
+
+
+
+better walking
+
+better swingin
+
+
+better positioning for boom vfx
+
+
+--------------------- webRTC version ------------------------
+
+JSON cancer: sometimes floats become strings after being converted and reparsed. This may or may not be for keys only.
+Because of this, a bunch of times client_ui.gd uses str(id) and the like.
+Also, Vector2 don't really work (as values), they get reconverted to a string, but it wasn't a big deal to replace them with two floats. 
+
+
+
+protocol:
+
+utf8 packages.
+
+first letter is the code describing the message type.
+the rest is either JSON (to be converted to a Godot dict), or a string to be converted to floats.
+
+"J" + JSON. A client has just joined the host's game, and is sending the char_data of its own character as JSON.
+"H" + JSON. A client has just joined the host's game, and is the host sends him a JSON dict with all characters' 
+            data (except the client's one). the key is the player id, and the value is another dict with the char data.
+"P" + JSON. Host sends positions for all characters he has to everyone.
+            JSON: {id1: [hand_x, hand_y, body_x, body_y, target_x, target_y] , id2: [hand_x, hand_y, body_x, body_y, target_x, target_y] , ...}
+            Note that that the IDs are strings, ex. "1", "87235", ecc.
+            
+"I" + JSON. A client is sending its input over to the host. not really an input, more of an input state.
+            JSON: an array of ints and floats.
+            [ move_x(-1,0,1), move_y(-1,0,1), attack(0,1), stance(INT), target_x(FLOAT), target_y(FLOAT) ]  
+                    [0]             [1]            [2]          [3]           [4]             [5]
+"G" + JSON. The host sends info about the game that is starting. the first field in the JSON is "mode" and is the name of the game mode. 
+            The other fields vary depending on the mode.
+
+Note: the J and H packets are redundant, in the sense that if the host processes his J packet and sends the H before the 2nd client processes 
+his own J, then the second client will get two requests to spawn the first client's character. This is not a proble because I can just
+check chars_by_id.has(id) to avoid spawning duplicate characters. 
+
+Probably needs a bunch more:
+
+- a client changed its name or color
+- all the ones for stances and shit
+
+
+
+----- next: -------
+
+    double death -- fixed
+
+    spectator mode camera pan -- done, BUT no smoothing
+    
+    joining a jobby with game started => spectator mode -- probably done
+    make sure spectator mode stays synced
+    
+    scoreboards and shit
+    
+    
+    "you win"
+    change host ui when game is on
+
+    USE DRAG_AMOUNT FOR BLOCK
+    
+    respawn timer
+
+    death VFX
+
+
+    spectating controls dont work for client -- was never true
+    don't respawn when disconnecting while spectating -- probs fixed
+    respawning from spectator mode kills the crab once
+
+
+    make sure collision detection works on client.
+        - red names
+        - yellow vfx
+
+    rewrite jump height
+
+    re-add controller support (for sane controllers too)
+    
+    reorganize disconnection signals
+    
+    reorganize the global node and shit
+    
+    max players doesn't do anything yet
+    
+    make sure that death is always syncronized for host and clients -- prob done
+
+    add gameplay and maps.
+
+    if platforms are added, add camera stabilization for platforms.
+
+
+
+
+    target mouse position doesn't update when not moving mouse --done
+
+
