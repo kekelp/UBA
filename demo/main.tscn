@@ -22,15 +22,43 @@ base_name = "poggers"
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="ProgressBar" type="ProgressBar" parent="CanvasLayer" groups=[
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+margin_right = 335.0
+margin_bottom = 71.0
+custom_constants/margin_right = 20
+custom_constants/margin_top = 20
+custom_constants/margin_left = 20
+custom_constants/margin_bottom = 20
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="CanvasLayer/MarginContainer"]
+visible = false
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 315.0
+margin_bottom = 51.0
+text = "poggers"
+
+[node name="ProgressBar" type="ProgressBar" parent="CanvasLayer/MarginContainer" groups=[
 "progressbar",
 ]]
-margin_left = 28.8517
-margin_top = 29.9018
-margin_right = 436.852
-margin_bottom = 89.9022
-rect_scale = Vector2( 0.887365, 0.485642 )
-value = 50.0
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 315.0
+margin_bottom = 51.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="debug" type="Label" parent="CanvasLayer" groups=[
+"debug",
+]]
+margin_left = 45.0
+margin_top = 111.0
+margin_right = 1158.0
+margin_bottom = 308.0
+autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -43,6 +71,10 @@ anchor_right = 0.5
 margin_left = -39.0
 margin_right = 39.0
 margin_bottom = 40.0
+custom_constants/margin_right = 30
+custom_constants/margin_top = 30
+custom_constants/margin_left = 30
+custom_constants/margin_bottom = 30
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -50,11 +82,10 @@ __meta__ = {
 [node name="Label" type="Label" parent="UI_spectating/MarginContainer" groups=[
 "UI_spectating",
 ]]
-visible = false
-margin_top = 13.0
-margin_right = 78.0
-margin_bottom = 27.0
-text = "SPECTATING"
+margin_left = 30.0
+margin_top = 30.0
+margin_right = 48.0
+margin_bottom = 44.0
 align = 1
 
 [node name="UI_gamemode" type="CanvasLayer" parent="."]
@@ -63,9 +94,9 @@ align = 1
 anchor_right = 1.0
 margin_bottom = 14.0
 custom_constants/margin_right = 800
-custom_constants/margin_top = 10
-custom_constants/margin_left = 10
-custom_constants/margin_bottom = 10
+custom_constants/margin_top = 30
+custom_constants/margin_left = 30
+custom_constants/margin_bottom = 30
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -73,10 +104,10 @@ __meta__ = {
 [node name="Label" type="Label" parent="UI_gamemode/MarginContainer" groups=[
 "UI_gamemode",
 ]]
-margin_left = 10.0
-margin_top = 10.0
+margin_left = 30.0
+margin_top = 30.0
 margin_right = 1120.0
-margin_bottom = 24.0
+margin_bottom = 44.0
 text = "LOBBY"
 align = 2
 __meta__ = {
@@ -85,3 +116,12 @@ __meta__ = {
 
 [node name="UI_main" parent="." instance=ExtResource( 3 )]
 layer = 2
+
+[node name="ui_statusbar" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="ui_statusbar"]
+anchor_right = 1.0
+margin_bottom = 63.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

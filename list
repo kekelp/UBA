@@ -98,50 +98,77 @@ Probably needs a bunch more:
 
 ----- next: -------
 
-    double death -- fixed
 
-    spectator mode camera pan -- done, BUT no smoothing
-    
-    joining a jobby with game started => spectator mode -- probably done
-    make sure spectator mode stays synced
-    
     scoreboards and shit
-    
-    
-    "you win"
-    change host ui when game is on
-
-    USE DRAG_AMOUNT FOR BLOCK
-    
-    respawn timer
 
     death VFX
-
-
-    spectating controls dont work for client -- was never true
-    don't respawn when disconnecting while spectating -- probs fixed
-    respawning from spectator mode kills the crab once
 
 
     make sure collision detection works on client.
         - red names
         - yellow vfx
 
-    rewrite jump height
 
-    re-add controller support (for sane controllers too)
-    
-    reorganize disconnection signals
-    
-    reorganize the global node and shit
+    ----- after: -------
+
+    rewrite jump height
+   
+    show scoreboard after game ends
     
     max players doesn't do anything yet
     
-    make sure that death is always syncronized for host and clients -- prob done
 
     add gameplay and maps.
 
     if platforms are added, add camera stabilization for platforms.
+
+    make sure that death is always syncronized for host and clients -- prob done
+
+    respawn timer
+
+
+    confirm quit button:
+        click to hold and the background gradient fills showing how long you have to hold it before it confirms, it's the kino way
+
+    re-add controller support (for sane controllers too)
+
+    hand position sometimes goes to NAN...... ??????????? not seen anymore but who knows
+
+----- done: -------
+
+
+    lives shouldn't be visible in lobby --done
+    restarting game multiple time doesn't work -- done 
+
+
+    "you win" --done
+    ask for confirmation before quitting (as host) -- done
+
+    double death -- fixed
+
+    spectator mode camera pan -- done, BUT no smoothing
+    
+    joining a jobby with game started => spectator mode -- probably done
+    make sure spectator mode stays synced -- hopefully????
+    
+    
+    
+    USE DRAG_AMOUNT FOR BLOCK -- no
+    
+
+    spawn pos doesn't seem to be random sometimes -- it's not randomized when joining into lobby. WONTFIX for now
+
+
+    spectating controls dont work for client -- was never true
+    don't respawn when disconnecting while spectating -- probs fixed
+    respawning from spectator mode kills the crab once -- fixed
+
+    spectator mode doesn't reset when quitting -- fixed
+
+
+
+    le visual sugar: - COPIED (+ copy from game menu too) -- done
+                     - ABORT game instead of restart -- done
 
 
 

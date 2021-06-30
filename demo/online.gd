@@ -57,13 +57,18 @@ func _process(delta):
 			if code == "H":
 				# spawn the images for all of the chars on host
 				var chars_data_by_id = JSON.parse(message).result
+				dbclear()
+				dbline("H command")
 				for id in chars_data_by_id:
+					dbline(str(id))
 					spawn_char(chars_data_by_id[id], id, NET_MODE.other_on_client, false)
 				setup_chars_for_new_gamemode(own_char.waiting_for_next_game)
 			elif code == "P":
-				# client is sending the positions of all characters
+				# host is sending the positions of all characters
 				var chars_pos_by_id = JSON.parse(message).result
+#				dbclear()
 				for id in chars_pos_by_id:
+#					dbline("id: "+ str(id) )
 					if chars_by_id.has(str(id)):
 						chars_by_id[str(id)].sync_position(chars_pos_by_id[str(id)])
 			elif code == "J":
@@ -82,7 +87,6 @@ func _process(delta):
 				# we joined mid-game so host is sending game mode info
 				var new_game_info = JSON.parse(message).result
 				Global.update_game_info(new_game_info)
-				print("nigger baka 420 ", Global.is_game_mode_open())
 				own_char.spectator_mode = not Global.is_game_mode_open()
 				own_char.waiting_for_next_game = not Global.is_game_mode_open()
 				
@@ -92,7 +96,9 @@ func _process(delta):
 		client.rtc_mp.set_target_peer(client.rtc_mp.TARGET_PEER_BROADCAST)
 		var keys = chars_by_id.keys()
 		var chars_pos = {}
+#		dbclear()
 		for k in keys:
+#			dbline("k "+str(k))
 			chars_pos[k] = chars_by_id[k].get_character_position()
 		var jstr = JSON.print(chars_pos)
 		client.rtc_mp.put_packet(("P"+jstr).to_utf8())
@@ -109,17 +115,6 @@ func _connected(id):
 	_log("Signaling server connected with ID: %d" % id)
 
 
-func _disconnected():
-		connected = false
-		# remove all remote chars
-		for k in chars_by_id.keys():
-				if chars_by_id.has(k) == true:
-					if chars_by_id[k] != own_char:
-						chars_by_id[k].queue_free()
-						chars_by_id.erase(k)
-		own_char.net_mode = NET_MODE.own_on_host
-		_log("Signaling server disconnected: %d - %s" % [client.code, client.reason])
-		emit_signal("left_game")
 
 
 func _lobby_joined(lobby):
@@ -159,17 +154,42 @@ func _mp_connected():
 
 func _mp_server_disconnect():
 	if host == false:
-		# remove all remote chars
-		for k in chars_by_id.keys():
-				if chars_by_id.has(k) == true:
-					if chars_by_id[k] != own_char:
-						chars_by_id[k].queue_free()
-						chars_by_id.erase(k)
-		# stop being a client char 
-		own_char.net_mode = NET_MODE.own_on_host
-		print("own net mode ",own_char.net_mode)
-#		connected = false
-	_log("Multiplayer is disconnected (I am %d)" % client.rtc_mp.get_unique_id())
+		leave_game()
+#		# remove all remote chars
+#		for k in chars_by_id.keys():
+#				if chars_by_id.has(k) == true:
+#					if chars_by_id[k] != own_char:
+#						chars_by_id[k].queue_free()
+#						chars_by_id.erase(k)
+#		# stop being a client char 
+#		own_char.net_mode = NET_MODE.own_on_host
+#	emit_signal("left_game")
+
+
+func _disconnected():
+	leave_game()
+#		_log("Signaling server disconnected: %d - %s" % [client.code, client.reason])
+#		emit_signal("left_game")
+
+func leave_game():
+	connected = false
+	# remove all remote chars
+	for k in chars_by_id.keys():
+			if chars_by_id.has(k) == true:
+				if chars_by_id[k] != own_char:
+					chars_by_id[k].queue_free()
+					chars_by_id.erase(k)
+				else:
+					chars_by_id.erase(k)
+	if host == true:
+		host = false
+	# ^ also remove self from the char list (since the id/key won't be 
+	# the same next time)
+	
+	own_char.net_mode = NET_MODE.own_on_host
+	Global.game_mode = Global.GAME_MODE.lobby
+	if own_char.spectator_mode == true:
+		own_char.respawn()
 	emit_signal("left_game")
 
 ### for when a client joins mid-game
@@ -188,6 +208,8 @@ func _mp_peer_connected(id: int):
 	# so that the client can run setup_chars_for_new_gamemode() 
 	# at the end of the "H" message
 	# send data about characters on host to the newly connected player
+	dbclear()
+	dbline("CONNECTED WITH ID "+str(id))
 	var keys = chars_by_id.keys()
 	var chars_data = {}
 	for k in keys:
@@ -215,11 +237,14 @@ func host_start_game():
 	setup_chars_for_new_gamemode()
 
 func setup_chars_for_new_gamemode(joined_mid = false):
-	print("poggers")
 	if Global.game_mode == Global.GAME_MODE.lobby:
 		for k in chars_by_id.keys():
-			if chars_by_id[k].spectator_mode == false:
+			# respawn the ones that were waiting
+#			if chars_by_id[k].spectator_mode == true:
 				chars_by_id[k].respawn()
+				dbline("respawn "+str(k))
+				# remove all gamemode-specific ui and shit
+				chars_by_id[k].hide_lives()
 				
 	elif Global.game_mode == Global.GAME_MODE.elimination:
 		var new_elim_lives = Global.elimination_max_lives
@@ -229,12 +254,9 @@ func setup_chars_for_new_gamemode(joined_mid = false):
 					if !chars_by_id[k].is_in_group("owned"):
 						print("skipping")
 					continue
-				else:
-					chars_by_id[k].waiting_for_next_game = false
 			chars_by_id[k].elim_lives = new_elim_lives
 			chars_by_id[k].respawn()
-			if !chars_by_id[k].is_in_group("owned"):
-				print("not skipping")
+			chars_by_id[k].show_lives()
 
 
 
@@ -266,6 +288,7 @@ func stop():
 	client.stop()
 
 func spawn_char(char_data, owner_id, net_mode, spect_mode):
+
 	if chars_by_id.has(str(owner_id)) == false:
 		var character = CHARACTER.instance()
 		self.add_child(character)
@@ -276,5 +299,56 @@ func spawn_char(char_data, owner_id, net_mode, spect_mode):
 		chars_by_id[str(owner_id)] = character
 
 
+onready var label = get_tree().get_nodes_in_group("debug")[0]
+func dbline(message):
+	if OS.is_debug_build():
+		label.text += (str(message)+"\n")
 
+func dbclear():
+	if OS.is_debug_build():
+		label.text += "\n"
+
+const ANNOUNCE_BANNER = preload("res://UI/announce_banner.tscn")
+func announce(message):
+	dbline(message)
+	var announce_banner = ANNOUNCE_BANNER.instance()
+	self.add_child(announce_banner)
+	announce_banner.get_node("MarginContainer/PanelContainer/Label").text = message
+
+func check_winner():
+	if Global.game_mode == Global.GAME_MODE.elimination:
+		var survivor
+		var n_surv = 0
+		for k in chars_by_id.keys():
+			if chars_by_id[k].elim_lives >= 1:
+				survivor = chars_by_id[k]
+				n_surv += 1
+		if n_surv == 1 && chars_by_id.keys().size() > 1:
+			declare_winner(survivor)
+		elif n_surv == 0:
+			declare_no_winners()
+
+func declare_winner(winner):
+	dbclear()
+	announce(winner.base_name + " WINS THE GAME!")
+
+func declare_no_winners():
+	dbclear()
+	announce(" NO SURVIVORS!")
+
+func _input(event):
+	
+	if OS.is_debug_build():
+		if event.is_action_pressed("ui_debug"):
+
+			dbline("waiting for next game: "+ str(own_char.waiting_for_next_game))
+			dbline("spect mode: "+ str(own_char.spectator_mode))
+	#
+	#		var label = get_tree().get_nodes_in_group("debug")[0]
+	#		label.text += "\n"
+	#		label.text += "CHARS:\n"
+	#		for k in chars_by_id.keys():
+	#			label.text += ("   ID "+ str(k)+" NAME "+chars_by_id[k].base_name)
+	#			label.text += (" visible: "+ str(chars_by_id[k].visible))
+	#			label.text += "\n"
 

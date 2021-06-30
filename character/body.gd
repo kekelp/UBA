@@ -15,13 +15,8 @@ func _ready():
 
 func _integrate_forces(state):
 	if should_reset == true:
-		print("teleporting pos", should_reset)
 		state.transform.origin = reset_pos
 		should_reset = false
 		get_parent().respawning = false
-
-		print("end of respawn, changing spect mode to false")
-		print("position ", get_parent().global_position)
-		print("elim lives ", get_parent().elim_lives)
 		get_parent().spectator_mode = false
 

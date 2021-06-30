@@ -1,17 +1,20 @@
 extends CanvasLayer
 
+onready var room_code = $MarginContainer/VBoxContainer/options_vbox/room_code
+onready var hide_button = $MarginContainer/VBoxContainer/hide_button
+onready var options_vbox = $MarginContainer/VBoxContainer/options_vbox
+
+
 func set_room_code(value):
-	$MarginContainer/VBoxContainer/room_code_lineedit.text = value
+	room_code.set_code(value)
 
 var shown = true
 
 func _on_hide_button_pressed():
 	shown = !shown
-	if shown == false: $MarginContainer/VBoxContainer/hide_button.text = "MENU"
-	else: $MarginContainer/VBoxContainer/hide_button.text = "HIDE"
-	$MarginContainer/VBoxContainer/room_code_label.visible = shown
-	$MarginContainer/VBoxContainer/room_code_lineedit.visible = shown
-	$MarginContainer/VBoxContainer/quit_button.visible = shown
+	if shown == false: hide_button.text = "MENU"
+	else: hide_button.text = "HIDE"
+	options_vbox.visible = shown
 
 
 func _on_quit_button_pressed():

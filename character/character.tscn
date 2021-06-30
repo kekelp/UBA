@@ -24,6 +24,11 @@ radius = 16.6596
 
 [sub_resource type="SpriteFrames" id=4]
 animations = [ {
+"frames": [ ExtResource( 8 ) ],
+"loop": true,
+"name": "grab",
+"speed": 0.0
+}, {
 "frames": [ ExtResource( 6 ) ],
 "loop": true,
 "name": "punch",
@@ -32,11 +37,6 @@ animations = [ {
 "frames": [ ExtResource( 7 ) ],
 "loop": true,
 "name": "grab_grip",
-"speed": 0.0
-}, {
-"frames": [ ExtResource( 8 ) ],
-"loop": true,
-"name": "grab",
 "speed": 0.0
 } ]
 
@@ -87,6 +87,7 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="body/g/UI"]
+visible = false
 margin_left = 17.0
 margin_top = 13.0
 margin_right = 25.0
@@ -103,9 +104,9 @@ scale = Vector2( 0.780807, 0.780807 )
 texture = ExtResource( 12 )
 
 [node name="name" type="Label" parent="body/g/UI"]
-margin_left = 35.0
+margin_left = 26.0
 margin_top = 13.0
-margin_right = 124.0
+margin_right = 115.0
 margin_bottom = 27.0
 text = "defaultfrog #7"
 align = 1

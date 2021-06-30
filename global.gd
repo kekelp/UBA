@@ -8,6 +8,9 @@ var matchmatking_server_url = "ws://localhost:9080"
 #var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
 
 enum GAME_MODE {lobby, elimination}
+# default mode (the one that you play if you click "start game"
+# from lobby without selecting anything)
+var default_game_mode = GAME_MODE.elimination
 var game_mode = GAME_MODE.lobby setget game_mode_changed
 var selected_game_mode = GAME_MODE.elimination
 var elimination_max_lives = 5
@@ -127,6 +130,12 @@ func update_game_info(new_game_info):
 		pass
 	elif new_game_mode == Global.GAME_MODE.elimination:
 		elimination_max_lives = new_game_info["lives"]
+
+
+onready var spect_label = get_tree().get_nodes_in_group("UI_spectating")[0]
+
+
+
 
 ### NOTE: only purely stateless modes like lobby should be open for now
 ### a mode that keeps stats for each character (like score in tf2-style 

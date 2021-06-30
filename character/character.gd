@@ -10,7 +10,7 @@ var elim_lives = 5
 
 var char_id
 
-var waiting_for_next_game = false
+var waiting_for_next_game = false setget set_waiting_for_next_game
 var spectator_mode = false setget change_spectator_mode
 
 enum NET_MODE {own_on_host, other_on_host, own_on_client, other_on_client}
@@ -120,6 +120,11 @@ var attack_disabled = false
 
 const YELLOW_BANG = preload("res://vfx/yellow-bang.tscn")
 
+var spectator_place = 1000000
+
+onready var base_gravity = $body.gravity_scale
+
+
 
 func random_npc_color():
 	var hue = rand_range(0.0, 1.0)
@@ -133,7 +138,7 @@ func _ready():
 #	switch_to_stance()
 	$hand.add_collision_exception_with($body)
 
-
+	
 func change_net_mode(newval):
 	net_mode = newval
 	if newval == NET_MODE.own_on_client or newval == NET_MODE.other_on_client:
@@ -170,10 +175,12 @@ var attack_timer_max = 1.25
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+#	if not self.is_in_group("owned"):
+#		print($hand.global_position)
 	if free_swing == false:
 		mouse_input = MOUSE_INPUT.withdraw
 #	if network_synced == false:
-	if net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host:
+	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
 
 		# HAND
 		# overheat BS
@@ -358,17 +365,17 @@ func _process(delta):
 	$body/g.rotation = -$body.rotation
 	
 	if spectator_mode == false:
-
-		if $body.global_position.y < arena.get_node("die_top").global_position.y:
-			die()
-		elif $body.global_position.y > arena.get_node("die_bottom").global_position.y:
-			die()
-		elif $body.global_position.x < arena.get_node("die_left").global_position.x:
-			die()
-		elif $body.global_position.x > arena.get_node("die_right").global_position.x:
-			die()
-		elif self.dead == true:
-			self.dead = false
+		if $body.global_position.x < spectator_place - 500:
+			if $body.global_position.y < arena.get_node("die_top").global_position.y:
+				die()
+			elif $body.global_position.y > arena.get_node("die_bottom").global_position.y:
+				die()
+			elif $body.global_position.x < arena.get_node("die_left").global_position.x:
+				die()
+			elif $body.global_position.x > arena.get_node("die_right").global_position.x:
+				die()
+			elif self.dead == true:
+				self.dead = false
 
 #
 #	# client side prediction
@@ -389,15 +396,19 @@ func _process(delta):
 func die():
 	if (dead == false):
 		print("dying")
+		print("   ", $body.global_position)
 		dead = true
 		if Global.game_mode == Global.GAME_MODE.lobby:
 			$RespawnTimer.start(respawn_wait_time_lobby)
 		elif Global.game_mode == Global.GAME_MODE.elimination:
-			if elim_lives > 1:
+			elim_lives -= 1
+			if elim_lives >= 1:
 				$RespawnTimer.start(respawn_wait_time)
-				elim_lives -= 1
+				if self.is_in_group("owned"):
+					Global.spect_label.text = "RESPAWNING..."
 			else:
-				self.spectator_mode = true
+				change_spectator_mode(true)
+				Global.online.check_winner()
 
 
 
@@ -454,11 +465,10 @@ func _on_body_body_entered(collider):
 			var suff_speed = diff_speed.length() > real_punch_min_speed
 			var coll_atk_disabled = collider.get_parent().attack_disabled
 			if collider.offensive_arc && suff_speed && coll_atk_disabled == false:
-
 				var yellow1 = YELLOW_BANG.instance()
 				self.add_child(yellow1)
 				yellow1.global_position = collider.global_position
-#
+
 #			# get hurt if being thrown
 #			if self.falling_from_throw == true:
 #				var impact_p = $body.mass * $body.linear_velocity
@@ -481,6 +491,7 @@ func big_booma(pos: Position2D):
 
 
 func update_damage_debuff():
+	Global.online.dbline(damage_taken)
 	var _inverse_damage = 1.0/(damage_taken)
 #	var alpha = 0.6 * min((damage_taken/maxopacitydamage),1 )
 #	$body.get_node("RedSprite").modulate = Color(0.7, 0.0, 0.0, alpha)
@@ -562,20 +573,33 @@ func set_name(name):
 	self.base_name = name
 	$body/g/UI/name.text = name
 
+
 func respawn():
 	if self.is_in_group("owned"):
-		print("calling a respawn.")
-		print("current gamemode ", Global.game_mode)
-		print("spect mode ", spectator_mode)
+		Global.spect_label.text = ""
+#	if self.is_in_group("owned"):
+	print("CALLING a respawn. ", self, " ", self.base_name)
 	
 	$body/g/UI/Label.text = str(elim_lives)
-	var left_x = arena.get_node("spawn-left").global_position.x
-	var right_x = arena.get_node("spawn-right").global_position.x
-	var spw_y = arena.get_node("spawn-left").global_position.y
-	randomize()
-	teleport( Vector2( rand_range(left_x, right_x)  , spw_y))
-	$body.linear_velocity = Vector2(0,0)
-	$hand.linear_velocity = Vector2(0,0)
+	
+	# position is reset only on host. client characters will get 
+	# their position puppeted around by the host anyway
+	# BUT note that spectator mode has to be set to false at the end of 
+	# teleport (in should_reset in body.gd)
+	# so the ones that don't teleport do it in their own branch
+	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
+		var left_x = arena.get_node("spawn-left").global_position.x
+		var right_x = arena.get_node("spawn-right").global_position.x
+		var spw_y = arena.get_node("spawn-left").global_position.y
+		randomize()
+		teleport( Vector2( rand_range(left_x, right_x)  , spw_y))
+		$body.linear_velocity = Vector2(0,0)
+		$hand.linear_velocity = Vector2(0,0)
+	else:
+		change_spectator_mode(false)
+		respawning = false
+		waiting_for_next_game = false
+	
 	self.damage_taken = almost_zero
 	self.update_damage_debuff()
 
@@ -602,7 +626,7 @@ func get_character_data():
 func set_character_data(c_data):
 	set_name(c_data.name)
 	set_color(c_data.color)
-	spectator_mode = c_data.spect_mode
+	change_spectator_mode(c_data.spect_mode)
 	waiting_for_next_game = c_data.waiting_for_next_game
 
 
@@ -633,14 +657,31 @@ func sync_position(c_pos):
 #		csp_velocity.y = c_pos[7]
 
 func change_spectator_mode(newval):
-	if self.is_in_group("owned"):
-		print("spect mode setter:  ", newval)
 	spectator_mode = newval
 	if newval == true:
+		$body.gravity_scale = 0
 		self.visible = false
-		self.global_position.x = -99999
-		self.global_position.y = -99999
+	
+		self.global_position.x = spectator_place
+		self.global_position.y = spectator_place
+	
 	elif newval == false:
+		$body.gravity_scale = base_gravity
 		self.visible = true
+	
 	if self.is_in_group("owned"):
-		get_tree().get_nodes_in_group("UI_spectating")[0].visible = newval
+		if newval == true && Global.spect_label.text != "WAITING FOR NEXT GAME...":
+			Global.spect_label.text = "SPECTATING"
+
+
+func set_waiting_for_next_game(newval):
+	waiting_for_next_game = newval
+	if waiting_for_next_game == true:
+		Global.spect_label.text = "WAITING FOR NEXT GAME..."
+
+
+func hide_lives():
+	$body/g/UI/Label.visible = false
+
+func show_lives():
+	$body/g/UI/Label.visible = true
