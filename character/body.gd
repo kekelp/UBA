@@ -9,9 +9,9 @@ var reset_pos = Vector2(0,0)
 func _ready():
 	pass
 
-#func _process(_delta):
-#	$g.rotation = -self.rotation
-#	$name.position = self.gl
+func _process(_delta):
+	$g.rotation = -self.rotation
+
 
 func _integrate_forces(state):
 	if should_reset == true:

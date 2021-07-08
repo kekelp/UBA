@@ -64,15 +64,6 @@ script = ExtResource( 5 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="body"]
 shape = SubResource( 2 )
 
-[node name="Sprite" type="Sprite" parent="body"]
-scale = Vector2( 0.421587, 0.421587 )
-texture = ExtResource( 3 )
-
-[node name="RedSprite" type="Sprite" parent="body"]
-modulate = Color( 1, 1, 1, 0 )
-scale = Vector2( 0.413364, 0.413364 )
-texture = ExtResource( 3 )
-
 [node name="g" type="Node2D" parent="body"]
 
 [node name="UI" type="HBoxContainer" parent="body/g"]
@@ -115,7 +106,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="custom_camera" type="Node2D" parent="body"]
+[node name="Sprite" type="Sprite" parent="body/g"]
+scale = Vector2( 0.421587, 0.421587 )
+texture = ExtResource( 3 )
+
+[node name="custom_camera" type="Node2D" parent="body/g/Sprite"]
+scale = Vector2( 2.37199, 2.37199 )
 script = ExtResource( 1 )
 
 [node name="hand" type="RigidBody2D" parent="." groups=[

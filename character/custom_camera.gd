@@ -22,14 +22,17 @@ var deadzone_x = 20
 var deadzone_y_down = 0
 var deadzone_y_up
 
-onready var character = get_parent()
+onready var character = get_parent().get_parent().get_parent()
+# the correct pos to follow is not the character's but the character's sprite
+onready var character_pos = get_parent()
+
 
 func is_own():
 	return (character.get_parent().net_mode == character.get_parent().NET_MODE.own_on_host or character.get_parent().net_mode == character.get_parent().NET_MODE.own_on_client )
 
 func _ready():
 	if is_own():
-		var character_x = -character.global_position.x  + get_viewport().size.x/2
+		var character_x = -character_pos.global_position.x  + get_viewport().size.x/2
 		var target_point = Vector2( character_x, startingy )
 		var frame_step = Transform2D(0.0, target_point)
 		Viewport.set_canvas_transform(frame_step)
@@ -67,7 +70,7 @@ func _process(delta):
 		var previous_frame_view_x = Viewport.get_canvas_transform().get_origin().x
 		var previous_frame_view_y = Viewport.get_canvas_transform().get_origin().y
 
-		var uncorr_target_x = -(character.global_position.x - get_viewport().size.x/2)
+		var uncorr_target_x = -(character_pos.global_position.x - get_viewport().size.x/2)
 	
 		if character.get_parent().spectator_mode == false:
 			# deadzone
@@ -78,7 +81,7 @@ func _process(delta):
 				target_x = max(uncorr_target_x - deadzone_x, previous_frame_view_x)
 
 
-			var uncorr_target_y = -(character.global_position.y - get_viewport().size.y/2)
+			var uncorr_target_y = -(character_pos.global_position.y - get_viewport().size.y/2)
 			var uncorr_y_diff = uncorr_target_y - previous_frame_view_y
 			if uncorr_y_diff < 0:
 				target_y = min(uncorr_target_y + deadzone_y_down, previous_frame_view_y)

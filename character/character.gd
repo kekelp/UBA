@@ -2,6 +2,9 @@ extends Node2D
 
 # game mode parameters
 
+var sync_drag = 0.9
+
+
 export var free_movement = true
 export var free_swing = true
 
@@ -137,13 +140,13 @@ func random_good_color():
 func _ready():
 #	switch_to_stance()
 	$hand.add_collision_exception_with($body)
-
+	change_net_mode(NET_MODE.own_on_host)
 	
 func change_net_mode(newval):
 	net_mode = newval
 	if newval == NET_MODE.own_on_client or newval == NET_MODE.other_on_client:
-		$body.mode = RigidBody2D.MODE_KINEMATIC
-		$hand.mode = RigidBody2D.MODE_KINEMATIC
+		$body.mode = RigidBody2D.MODE_RIGID
+		$hand.mode = RigidBody2D.MODE_RIGID
 	else:
 		$body.mode = RigidBody2D.MODE_RIGID
 		$hand.mode = RigidBody2D.MODE_RIGID
@@ -173,6 +176,7 @@ onready var arena = get_tree().get_nodes_in_group("arena")[0]
 var attack_timer = 0
 var attack_timer_max = 1.25
 
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
 #	if not self.is_in_group("owned"):
@@ -187,7 +191,8 @@ func _physics_process(delta):
 #	if self.is_in_group("owned"):
 #		Global.online.dbset("amongrel "+ str(MOUSE_INPUT.attack))
 #		Global.online.dbline("mode " +str(NET_MODE.keys()[net_mode]))
-	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host or self.is_in_group("owned")):
+#	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
+	if true:
 		if mouse_input == MOUSE_INPUT.attack && attack_timer < attack_timer_max+0.10:
 			attack_timer +=delta
 		elif attack_timer > 0:
@@ -203,8 +208,8 @@ func _physics_process(delta):
 		
 		
 		
-	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
-
+#	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
+	if true:
 		# hand physics
 		# punch state analysis 
 		var return_vec: Vector2 = $body.global_position - $hand.global_position
@@ -238,7 +243,7 @@ func _physics_process(delta):
 			$hand.should_drag = true
 			$hand.drag_return_vec = return_vec
 			$hand.drag_amount = drag_amount
-			$hand.delta = delta		
+			$hand.delta = delta
 #			$hand.global_position += return_vec*drag_amount*delta
 		
 			var att_str = punch_force
@@ -350,7 +355,8 @@ func _physics_process(delta):
 	#		print($body.linear_velocity.y)
 			$body.applied_force = body_force
 	
-	
+
+
 
 #
 #	if stance == STANCE.grabbing:
@@ -365,10 +371,7 @@ func _physics_process(delta):
 
 
 func _process(delta):
-	# mongrel
-#	if self.is_in_group("owned"):
-#		var progressbar = get_tree().get_nodes_in_group("progressbar")[0]
-#		progressbar.value = overheat*100.0
+
 	# fix body rotation
 	$body/g.rotation = -$body.rotation
 	
@@ -384,21 +387,18 @@ func _process(delta):
 				die()
 			elif self.dead == true:
 				self.dead = false
+	
 
+
+	# if client, smooth the apparent positions 
+#	if self.net_mode == NET_MODE.own_on_client or self.net_mode == NET_MODE.other_on_client:
 #
-	# client side prediction
-	if net_mode == NET_MODE.own_on_client or net_mode == NET_MODE.other_on_client:
-		if csp_last_position == $body.global_position:
-			var vel = csp_last_position - csp_2nd_last_position
-			$body.global_position += vel
-			var hand_vel = csp_hand_last_position - csp_hand_2nd_last_position
-			$hand.global_position += hand_vel
+#		$body/g/Sprite.position = sync_drag * $body/g/Sprite.position
+#
+#		$hand/g/Sprite.position = sync_drag * $hand/g/Sprite.position
 
-		csp_2nd_last_position = csp_last_position
-		csp_last_position = $body.global_position
 
-		csp_hand_2nd_last_position = csp_hand_last_position
-		csp_hand_last_position = $hand.global_position
+
 
 
 func die():
@@ -574,7 +574,7 @@ func update_damage_debuff():
 
 func set_color(color: Color):
 	self.base_color = color
-	$body/Sprite.modulate = color
+	$body/g/Sprite.modulate = color
 	$hand/g/Sprite.modulate = color.lightened(0.5)
 	
 func set_name(name):
@@ -626,7 +626,7 @@ func _on_RespawnTimer_timeout():
 func get_character_data():
 	var c_data = {}
 	c_data.name = ($body/g/UI/name.text)
-	c_data.color = Color($body/Sprite.modulate).to_html()
+	c_data.color = Color($body/g/Sprite.modulate).to_html()
 	c_data.spect_mode = spectator_mode
 	c_data.waiting_for_next_game = waiting_for_next_game
 	return c_data.duplicate()
@@ -649,21 +649,43 @@ func get_character_position():
 	c_pos.push_back(target_b_pos.x)
 	c_pos.push_back(target_b_pos.y)
 	# velocity for client side prediction
-#	c_pos.push_back($body.linear_velocity.x)
-#	c_pos.push_back($body.linear_velocity.y)
+	c_pos.push_back($hand.linear_velocity.x)
+	c_pos.push_back($hand.linear_velocity.y)
+	c_pos.push_back($body.linear_velocity.x)
+	c_pos.push_back($body.linear_velocity.y)
 	return c_pos
 
 
+
 func sync_position(c_pos):
-		$hand.global_position.x = c_pos[0]
-		$hand.global_position.y = c_pos[1]
-		$body.global_position.x = c_pos[2]
-		$body.global_position.y = c_pos[3]
-		target_b_pos.x = c_pos[4]
-		target_b_pos.y = c_pos[5]
-#	# velocity for client side prediction
-#		csp_velocity.x = c_pos[6]
-#		csp_velocity.y = c_pos[7]
+# smooth
+#
+#	var bigstep = 50
+#	var lesign = -1
+#
+#	var hand_step = Vector2( c_pos[0] - $hand.global_position.x, c_pos[1] - $hand.global_position.y ) 
+#	if hand_step.length() > bigstep:
+#		$hand/g/Sprite.position += lesign*hand_step *sync_drag
+#
+#	var body_step = Vector2( c_pos[2] - $body.global_position.x, c_pos[3] - $body.global_position.y ) 
+#	if body_step.length() > bigstep:
+#		$body/g/Sprite.position += lesign*body_step *sync_drag
+#
+	
+	
+	# sync
+	$hand.global_position.x = c_pos[0]
+	$hand.global_position.y = c_pos[1]
+	$body.global_position.x = c_pos[2]
+	$body.global_position.y = c_pos[3]
+	target_b_pos.x = c_pos[4]
+	target_b_pos.y = c_pos[5]
+	$hand.linear_velocity.x = c_pos[6]
+	$hand.linear_velocity.y = c_pos[7]
+	$body.linear_velocity.x = c_pos[8]
+	$body.linear_velocity.y = c_pos[9]
+	
+
 
 func change_spectator_mode(newval):
 	spectator_mode = newval
@@ -696,3 +718,13 @@ func hide_lives():
 
 func show_lives():
 	$body/g/UI/Label.visible = true
+
+
+#func _input(event):
+#	# Mouse in viewport coordinates.
+#	if event is InputEventMouseButton:
+#		if event.is_pressed():
+#			var tvec = get_viewport().get_mouse_position() - get_viewport().get_canvas_transform().get_origin()
+#			if not self.is_in_group("owned"):
+#				$body.global_position = tvec
+

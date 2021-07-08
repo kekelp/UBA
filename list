@@ -98,6 +98,9 @@ Probably needs a bunch more:
 
 ----- next: -------
 
+    mind the fact that the body Sprite is now a child of the /g/ node
+
+    uncomment drag_amount line?
 
     scoreboards and shit
 
@@ -110,6 +113,8 @@ Probably needs a bunch more:
 
 
     ----- after: -------
+    
+    le big hands??
 
     rewrite jump height
    

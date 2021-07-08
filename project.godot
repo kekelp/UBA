@@ -157,6 +157,10 @@ ui_debug={
 
 modules/webrtc_gdnative_script="res://demo/webrtc/webrtc.gdns"
 
+[physics]
+
+common/physics_jitter_fix=0.0
+
 [rendering]
 
 quality/driver/driver_name="GLES2"
