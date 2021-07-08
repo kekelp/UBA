@@ -40,8 +40,15 @@ func _input(event):
 		if pawn.net_mode == pawn.NET_MODE.own_on_client:
 			# convert_event will store the input in "input" and do nothing.
 			# the network client class will have to fetch the input from here 
-			# and send it over to the host. 
+			# and send it over to the host.
+			# EXCEPT some minor things like updating the progressbar need
+			# to be done on the client side as well. handle_input_client is 
+			# a shorter version of handle_input that skips most things
+#			handle_input_own_on_client(input)
 			convert_event(event)
+
+#func handle_input_own_on_client(input):
+#	pawn.mouse_input = input[ATTACK]
 
 func handle_input(input):
 	### new

@@ -124,7 +124,7 @@ var spectator_place = 1000000
 
 onready var base_gravity = $body.gravity_scale
 
-
+var overheat = 0
 
 func random_npc_color():
 	var hue = rand_range(0.0, 1.0)
@@ -179,28 +179,32 @@ func _physics_process(delta):
 #		print($hand.global_position)
 	if free_swing == false:
 		mouse_input = MOUSE_INPUT.withdraw
-#	if network_synced == false:
-	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
 
-		# HAND
-		# overheat BS
 
+	# HAND
+	# overheat BS
+	# mongrel
+#	if self.is_in_group("owned"):
+#		Global.online.dbset("amongrel "+ str(MOUSE_INPUT.attack))
+#		Global.online.dbline("mode " +str(NET_MODE.keys()[net_mode]))
+	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host or self.is_in_group("owned")):
 		if mouse_input == MOUSE_INPUT.attack && attack_timer < attack_timer_max+0.10:
 			attack_timer +=delta
 		elif attack_timer > 0:
 			attack_timer -= delta*2
 		else:
 			attack_timer = 0
-		var overheat = clamp(attack_timer/attack_timer_max, 0, 1.0)
-		if self.is_in_group("owned"):
-			var progressbar = get_tree().get_nodes_in_group("progressbar")[0]
-			progressbar.value = overheat*100.0
+		overheat = clamp(attack_timer/attack_timer_max, 0, 1.0)
 		if overheat > 0.7:
 			self.attack_disabled = true
 		else:
 			self.attack_disabled = false
 		self.punch_force = lerp(0.35*bpf, bpf, 1.3-overheat)
 		
+		
+		
+	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
+
 		# hand physics
 		# punch state analysis 
 		var return_vec: Vector2 = $body.global_position - $hand.global_position
@@ -361,6 +365,10 @@ func _physics_process(delta):
 
 
 func _process(delta):
+	# mongrel
+#	if self.is_in_group("owned"):
+#		var progressbar = get_tree().get_nodes_in_group("progressbar")[0]
+#		progressbar.value = overheat*100.0
 	# fix body rotation
 	$body/g.rotation = -$body.rotation
 	
@@ -378,19 +386,19 @@ func _process(delta):
 				self.dead = false
 
 #
-#	# client side prediction
-#	if net_mode == NET_MODE.own_on_client or net_mode == NET_MODE.other_on_client:
-#		if csp_last_position == $body.global_position:
-#			var vel = csp_last_position - csp_2nd_last_position
-#			$body.global_position += vel
-#			var hand_vel = csp_hand_last_position - csp_hand_2nd_last_position
-#			$hand.global_position += hand_vel
-#
-#		csp_2nd_last_position = csp_last_position
-#		csp_last_position = $body.global_position
-#
-#		csp_hand_2nd_last_position = csp_hand_last_position
-#		csp_hand_last_position = $hand.global_position
+	# client side prediction
+	if net_mode == NET_MODE.own_on_client or net_mode == NET_MODE.other_on_client:
+		if csp_last_position == $body.global_position:
+			var vel = csp_last_position - csp_2nd_last_position
+			$body.global_position += vel
+			var hand_vel = csp_hand_last_position - csp_hand_2nd_last_position
+			$hand.global_position += hand_vel
+
+		csp_2nd_last_position = csp_last_position
+		csp_last_position = $body.global_position
+
+		csp_hand_2nd_last_position = csp_hand_last_position
+		csp_hand_last_position = $hand.global_position
 
 
 func die():
@@ -406,6 +414,7 @@ func die():
 				$RespawnTimer.start(respawn_wait_time)
 				if self.is_in_group("owned"):
 					Global.spect_label.text = "RESPAWNING..."
+					Global.spect_label.get_parent().visible = true
 			else:
 				change_spectator_mode(true)
 				Global.online.check_winner()
@@ -491,7 +500,6 @@ func big_booma(pos: Position2D):
 
 
 func update_damage_debuff():
-	Global.online.dbline(damage_taken)
 	var _inverse_damage = 1.0/(damage_taken)
 #	var alpha = 0.6 * min((damage_taken/maxopacitydamage),1 )
 #	$body.get_node("RedSprite").modulate = Color(0.7, 0.0, 0.0, alpha)
@@ -577,6 +585,7 @@ func set_name(name):
 func respawn():
 	if self.is_in_group("owned"):
 		Global.spect_label.text = ""
+		Global.spect_label.get_parent().visible = false
 #	if self.is_in_group("owned"):
 	print("CALLING a respawn. ", self, " ", self.base_name)
 	
@@ -672,12 +681,14 @@ func change_spectator_mode(newval):
 	if self.is_in_group("owned"):
 		if newval == true && Global.spect_label.text != "WAITING FOR NEXT GAME...":
 			Global.spect_label.text = "SPECTATING"
+			Global.spect_label.get_parent().visible = true
 
 
 func set_waiting_for_next_game(newval):
 	waiting_for_next_game = newval
 	if waiting_for_next_game == true:
 		Global.spect_label.text = "WAITING FOR NEXT GAME..."
+		Global.spect_label.get_parent().visible = true
 
 
 func hide_lives():

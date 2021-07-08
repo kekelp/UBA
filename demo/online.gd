@@ -58,9 +58,7 @@ func _process(delta):
 				# spawn the images for all of the chars on host
 				var chars_data_by_id = JSON.parse(message).result
 				dbclear()
-				dbline("H command")
 				for id in chars_data_by_id:
-					dbline(str(id))
 					spawn_char(chars_data_by_id[id], id, NET_MODE.other_on_client, false)
 				setup_chars_for_new_gamemode(own_char.waiting_for_next_game)
 			elif code == "P":
@@ -165,10 +163,12 @@ func _mp_server_disconnect():
 #		own_char.net_mode = NET_MODE.own_on_host
 #	emit_signal("left_game")
 
-
-func _disconnected():
-	leave_game()
-#		_log("Signaling server disconnected: %d - %s" % [client.code, client.reason])
+#
+#func _disconnected():
+#	pass
+#
+##	leave_game()
+##		_log("Signaling server disconnected: %d - %s" % [client.code, client.reason])
 #		emit_signal("left_game")
 
 func leave_game():
@@ -217,14 +217,27 @@ func _mp_peer_connected(id: int):
 			chars_data[k] = chars_by_id[k].get_character_data()
 	var jstr = JSON.print(chars_data)
 	client.rtc_mp.put_packet(("H"+jstr).to_utf8())
-	# then, in _process, receive data about the connected client's char
+	# then, in _process, we will receive data about the connected client's char
+	
 	_log("Multiplayer peer %d connected" % id)
 
+func check_for_full_lobby():
+	# seal the lobby if it's full
+	Global.online.dbline("global.max_players "+str(Global.max_players))
+	Global.online.dbline("current players "+str(chars_by_id.size())+"\n" )
+			
+	if chars_by_id.size() >= Global.max_players:
+		client.seal_lobby()
 
 func _mp_peer_disconnected(id: int):
 	if chars_by_id.has(str(id)) == true:
 		chars_by_id[str(id)].queue_free()
 		chars_by_id.erase(str(id))
+
+# there's currently no way to unseal the lobby. KEK!
+#	if chars_by_id.size() < Global.max_players:
+#		client.unseal_lobby()
+		
 	_log("Multiplayer peer %d disconnected" % id)
 
 
@@ -242,7 +255,6 @@ func setup_chars_for_new_gamemode(joined_mid = false):
 			# respawn the ones that were waiting
 #			if chars_by_id[k].spectator_mode == true:
 				chars_by_id[k].respawn()
-				dbline("respawn "+str(k))
 				# remove all gamemode-specific ui and shit
 				chars_by_id[k].hide_lives()
 				
@@ -286,6 +298,7 @@ func _on_Seal_pressed():
 
 func stop():
 	client.stop()
+	leave_game()
 
 func spawn_char(char_data, owner_id, net_mode, spect_mode):
 
@@ -297,12 +310,17 @@ func spawn_char(char_data, owner_id, net_mode, spect_mode):
 		character.net_mode = net_mode
 		character.control_mode = character.CONTROL_MODE.kbm_or_gamepad
 		chars_by_id[str(owner_id)] = character
-
+		if host == true:
+			check_for_full_lobby()
 
 onready var label = get_tree().get_nodes_in_group("debug")[0]
 func dbline(message):
 	if OS.is_debug_build():
 		label.text += (str(message)+"\n")
+
+func dbset(message):
+	if OS.is_debug_build():
+		label.text = (str(message)+"\n")
 
 func dbclear():
 	if OS.is_debug_build():
@@ -310,7 +328,6 @@ func dbclear():
 
 const ANNOUNCE_BANNER = preload("res://UI/announce_banner.tscn")
 func announce(message):
-	dbline(message)
 	var announce_banner = ANNOUNCE_BANNER.instance()
 	self.add_child(announce_banner)
 	announce_banner.get_node("MarginContainer/PanelContainer/Label").text = message
@@ -340,10 +357,9 @@ func _input(event):
 	
 	if OS.is_debug_build():
 		if event.is_action_pressed("ui_debug"):
+			Global.online.dbline("vis "+str(Global.spect_label.get_parent().visible))
 
-			dbline("waiting for next game: "+ str(own_char.waiting_for_next_game))
-			dbline("spect mode: "+ str(own_char.spectator_mode))
-	#
+			
 	#		var label = get_tree().get_nodes_in_group("debug")[0]
 	#		label.text += "\n"
 	#		label.text += "CHARS:\n"
