@@ -22,22 +22,17 @@ export (NET_MODE) var net_mode setget change_net_mode
 
 enum CONTROL_MODE {kbm, gamepad, kbm_or_gamepad, bot, none}
 export(CONTROL_MODE) var control_mode:int = CONTROL_MODE.kbm_or_gamepad
-# state
+########################## state
 
-#enum STANCE {punching, grabbing, rasengan}
-enum STANCE {punching, grabbing}
-enum STATE {swinging, throwing1, throwing2}
+enum STANCE {punching, grabbing, rasengan}
 enum MOUSE_INPUT {attack, withdraw}
 var mouse_input: int = MOUSE_INPUT.withdraw
 
 var outwards: bool = false
 var towards_enemy: bool = false
 
-var n_stances = 2
-
 export var stance: int = STANCE.punching
 
-var state = STATE.swinging
 var being_grabbed: bool = false
 var falling_from_throw: bool = false
 
@@ -46,53 +41,33 @@ var moving_left: bool = false
 var moving_up: bool = false
 var moving_down: bool = false
 
-var enemy_grabbing_hand = null
-
-var body_getting_grabbed_by_self = null
-
-var airborne = false
-
 export var base_color: Color = Color(0.8, 0.7, 3.0)
 
 export var base_name = "defaultfrog #12"
 var dead = false
 var respawning = false
-# parameters
 
-# punch swing
+
+#################################### stats/parameters
+
 var oscillator_force = 85.0
-#var oscillator_force = 45.0
+
 var drag_amount = 4.85
-#var drag_amount = 3.5
+
 var bpf = 750 *1000
 var punch_force = bpf
-#var punch_force = 500 *1000
-
-
 
 var respawn_wait_time = 1.0
 var respawn_wait_time_lobby = 0.2
 
-var global_throw_nerf = 0.9
-
-var release1_wait = 0.2
-var release2_wait = 0.4
-
-var falling_from_throw_wait = 0.3
-
-var p_to_damage_coeff_FALL = 0.75
 
 var p_to_damage_coeff = 0.35
 var maxopacitydamage = 500
 
-#var extra_kick_coeff = 0.35
 var extra_kick_coeff = 0.75
-var extra_grabkick_coeff = 0.95
 
-
-var x_dirmod = 0.0
 var x_max_speed = 800
-#var x_max_walk_force = 3000000
+
 var x_max_walk_force = 6000000
 var x_damp = 950
 
@@ -103,14 +78,16 @@ var y_max_speed_damp = 950
 
 
 # punching damage
-#var hand_base_mass = 2.0
 var hand_base_mass = 2.5
 var hand_off_arc_mass_boost = 4.0
-#var hand_off_arc_mass_boost = 5.0
 var real_punch_min_speed = 500
 
+onready var base_gravity = $body.gravity_scale
 
-# holding 
+
+############################à# holding / internal
+var x_dirmod = 0.0
+
 var body_force: Vector2
 
 var csp_velocity: Vector2
@@ -125,39 +102,13 @@ const YELLOW_BANG = preload("res://vfx/yellow-bang.tscn")
 
 var spectator_place = 1000000
 
-onready var base_gravity = $body.gravity_scale
-
 var overheat = 0
 
-func random_npc_color():
-	var hue = rand_range(0.0, 1.0)
-	return Color.from_hsv(hue, 0.58, 0.7)
-
-func random_good_color():
-	var hue = rand_range(0.0, 1.0)
-	return Color.from_hsv(hue, 0.8, 0.85)
-# Called when the node enters the scene tree for the first time.
-func _ready():
-#	switch_to_stance()
-	$hand.add_collision_exception_with($body)
-	change_net_mode(NET_MODE.own_on_host)
-	
-func change_net_mode(newval):
-	net_mode = newval
-	if newval == NET_MODE.own_on_client or newval == NET_MODE.other_on_client:
-		$body.mode = RigidBody2D.MODE_RIGID
-		$hand.mode = RigidBody2D.MODE_RIGID
-	else:
-		$body.mode = RigidBody2D.MODE_RIGID
-		$hand.mode = RigidBody2D.MODE_RIGID
-
-# vars
 var fall_timer = 0
 
 var almost_zero = 0.00001
 var damage_taken: float = almost_zero
-#
-#var target: Node2D
+
 var target_b_pos: Vector2
 
 var direction: float = 0
@@ -176,17 +127,46 @@ onready var arena = get_tree().get_nodes_in_group("arena")[0]
 var attack_timer = 0
 var attack_timer_max = 1.25
 
-
 var physics_proc_delta = 0
+
+
+
+###################### functions
+
+func random_npc_color():
+	var hue = rand_range(0.0, 1.0)
+	return Color.from_hsv(hue, 0.58, 0.7)
+
+func random_good_color():
+	var hue = rand_range(0.0, 1.0)
+	return Color.from_hsv(hue, 0.8, 0.85)
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+#	switch_to_stance()
+	$hand.add_collision_exception_with($body)
+	change_net_mode(NET_MODE.own_on_host)
+
+
+# now useless...
+func change_net_mode(newval):
+	net_mode = newval
+	if newval == NET_MODE.own_on_client or newval == NET_MODE.other_on_client:
+		$body.mode = RigidBody2D.MODE_RIGID
+		$hand.mode = RigidBody2D.MODE_RIGID
+	else:
+		$body.mode = RigidBody2D.MODE_RIGID
+		$hand.mode = RigidBody2D.MODE_RIGID
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
 	physics_proc_delta = delta
-
 	if free_swing == false:
 		mouse_input = MOUSE_INPUT.withdraw
-
-
+	
+	
 	# HAND
 	# overheat BS
 #	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
@@ -236,7 +216,7 @@ func _physics_process(delta):
 		var new_vec: Vector2 = target_b_pos - $body.global_position 
 		# attack
 		if mouse_input == MOUSE_INPUT.attack:
-
+	
 			var att_str = punch_force
 			$hand.punch_force += new_vec.normalized()*att_str* delta
 			
@@ -277,7 +257,6 @@ func _physics_process(delta):
 			
 			if abs($body.linear_velocity.y) > y_max_speed:
 				y_force -= ($body.linear_velocity.y - y_max_speed)* delta * y_max_speed_damp  
-
 				
 			body_force += Vector2(x_force, y_force)
 			$body.applied_force = body_force
@@ -303,8 +282,7 @@ func _process(delta):
 			elif self.dead == true:
 				self.dead = false
 	
-
-
+	
 	# if client, smooth the apparent positions 
 #	if self.net_mode == NET_MODE.own_on_client or self.net_mode == NET_MODE.other_on_client:
 #
@@ -358,21 +336,7 @@ func _on_body_body_entered(collider):
 				yellow1.global_position = collider.global_position
 				
 			update_damage_debuff()
-#			var diff_speed = (collider.linear_velocity)
-#			var diff_power = diff_speed.dot( $body.linear_velocity.normalized())
-#	#		var diff_momentum = collider.mass * diff_power
-#			var incoming_p = collider.mass * diff_speed
-#			self.damage_taken += sqrt(incoming_p.length())* p_to_damage_coeff * 0.2
-#			# extra kick
-#			var suff_speed = diff_speed.length() > real_punch_min_speed
-#			var coll_atk_disabled = collider.get_parent().attack_disabled
-#			if collider.offensive_arc && suff_speed && coll_atk_disabled == false:
-#				self.damage_taken += sqrt(incoming_p.length())* p_to_damage_coeff * 0.8
-#				$body.apply_central_impulse($body.linear_velocity.normalized() *diff_power *0.1*extra_kick_coeff*damage_taken)
-#				var yellow1 = YELLOW_BANG.instance()
-#				self.add_child(yellow1)
-#				yellow1.global_position = collider.global_position
-#			update_damage_debuff()
+			
 		elif collider.is_in_group("arena"):
 			# bounce adjust
 			var too_slow = max(y_min_speed - abs($body.linear_velocity.y), 0)/y_max_speed
@@ -392,20 +356,6 @@ func _on_body_body_entered(collider):
 				self.add_child(yellow1)
 				yellow1.global_position = collider.global_position
 
-#			# get hurt if being thrown
-#			if self.falling_from_throw == true:
-#				var impact_p = $body.mass * $body.linear_velocity
-#				self.damage_taken += sqrt(impact_p.length())* p_to_damage_coeff_FALL
-#	#			print("fall damage ",sqrt(impact_p.length())* p_to_damage_coeff_FALL)
-#				if ($body.linear_velocity.length() > real_punch_min_speed*2):
-#					pass
-	#				var yellow1 = YELLOW_BANG.instance()
-	#				print(self)
-	#				print(self.owner)
-	#				self.add_child(yellow1)
-	#				yellow1.global_position = $body.global_position
-#				update_damage_debuff()
-			
 
 func big_booma(pos: Position2D):
 	var yellow1 = YELLOW_BANG.instance()
@@ -423,67 +373,6 @@ func update_damage_debuff():
 	$body/g/UI/name.modulate = white.blend(newred_alpha)
 
 
-
-# for when the fingers hit something. collider is the guy getting grabbed
-#func _on_fingers_body_entered(collider):
-#	if collider.get_name() == "body":
-#		if $body != collider:
-#			grab(collider)
-##			print("i grabbed the streamer lol", collider, collider.get_name())
-#	if collider.get_name() == "hand":
-#		if $hand != collider:
-#			# judo move
-#			pass
-
-#
-#func grab(body_getting_grabbed: RigidBody2D):
-#	body_getting_grabbed.owner.being_grabbed = true
-#	body_getting_grabbed.owner.enemy_grabbing_hand = $hand
-#	body_getting_grabbed.add_collision_exception_with($body)
-#	body_getting_grabbed.owner.get_node("hand").add_collision_exception_with($body)
-#	self.body_getting_grabbed_by_self = body_getting_grabbed
-#	$hand/g/Sprite.play("grab_grip")
-#	self.release_timer = 0
-#	self.state = STATE.throwing1
-#
-#func release1(body_getting_released: RigidBody2D):
-#	body_getting_released.owner.being_grabbed = false
-#	body_getting_released.owner.enemy_grabbing_hand = null
-#	# throw extra kick
-#	if self.airborne == false:
-#		pass
-#		body_getting_released.apply_central_impulse($body.linear_velocity.normalized()*1000.0 *body_getting_released.owner.extra_grabkick_coeff *body_getting_released.owner.damage_taken* 0.004*global_throw_nerf)
-#	body_getting_released.owner.falling_from_throw = true
-#	self.release_timer = 0
-#	self.state = STATE.throwing2
-
-#
-#func release2(body_getting_released: RigidBody2D):
-#	body_getting_released.remove_collision_exception_with($body)
-#	body_getting_released.owner.get_node("hand").remove_collision_exception_with($body)
-#	self.body_getting_grabbed_by_self = null
-#	self.state = STATE.swinging
-#	$hand/g/Sprite.play("grab")
-#
-#func switch_to_stance_punching():
-#	self.stance = STANCE.punching
-#	$hand/g/Sprite.play("punch")
-#
-#func switch_to_stance_grabbing():
-#	self.stance = STANCE.grabbing
-#	$hand/g/Sprite.play("grab")
-#
-#func switch_to_stance_rasengan():
-#	self.stance = STANCE.rasengan
-#	$hand/g/Sprite.play("rasengan")
-#
-#func switch_to_stance():
-#	if self.stance == STANCE.punching:
-#		self.switch_to_stance_punching()
-#	if self.stance == STANCE.grabbing:
-#		self.switch_to_stance_grabbing()
-##	if self.stance == STANCE.rasengan:
-##		self.switch_to_stance_rasengan()
 
 
 func set_color(color: Color):
