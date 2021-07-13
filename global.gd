@@ -4,16 +4,17 @@ var character_color: Color setget color_change
 var character_name = "anonymous" setget name_change
 var room_code
 var max_players = 99
-#var matchmatking_server_url = "ws://localhost:9080"
-var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
+var matchmatking_server_url = "ws://localhost:9080"
+#var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
 
 enum GAME_MODE {lobby, elimination}
+
 # default mode (the one that you play if you click "start game"
 # from lobby without selecting anything)
 var default_game_mode = GAME_MODE.elimination
 var game_mode = GAME_MODE.lobby setget game_mode_changed
 var selected_game_mode = GAME_MODE.elimination
-var elimination_max_lives = 5
+var elimination_max_lives = 3
 
 const MAIN_UI = preload("res://UI/UI-main.tscn")
 const HOST_UI = preload("res://UI/ui_host/ui_host.tscn")

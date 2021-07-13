@@ -11,8 +11,7 @@ var reset_pos = Vector2(0,0)
 
 var should_drag = true
 var drag_return_vec
-var drag_amount
-var delta
+var drag_amount = 4.85
 
 onready var base_y_scale = $g/Sprite.scale.y
 
@@ -23,7 +22,6 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-
 	$g.rotation = -self.rotation
 #	$g/Sprite.rotation_degrees = 90
 	var a = self.global_position
@@ -41,5 +39,6 @@ func _integrate_forces(state):
 		state.transform.origin = reset_pos
 		should_reset = false
 	elif should_drag:
+		var drag_return_vec: Vector2 = $"../body".global_position - self.global_position
 		if (get_parent().net_mode == get_parent().NET_MODE.own_on_host || get_parent().net_mode == get_parent().NET_MODE.other_on_host ):
-			state.transform.origin += drag_return_vec*drag_amount*delta
+			state.transform.origin += drag_return_vec*drag_amount*get_parent().physics_proc_delta

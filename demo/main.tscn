@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://character/character.tscn" type="PackedScene" id=1]
 [ext_resource path="res://online.tscn" type="PackedScene" id=2]
 [ext_resource path="res://UI/UI-main.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Arena.tscn" type="PackedScene" id=4]
+[ext_resource path="res://UI/fading-panel/fading-panel.tscn" type="PackedScene" id=5]
 
 [node name="main" type="Node2D"]
 
@@ -25,6 +26,7 @@ base_name = "poggers"
 [node name="debug" type="Label" parent="CanvasLayer" groups=[
 "debug",
 ]]
+visible = false
 margin_left = 45.0
 margin_top = 111.0
 margin_right = 1158.0
@@ -37,8 +39,8 @@ __meta__ = {
 [node name="UI_spectating" type="CanvasLayer" parent="."]
 
 [node name="MarginContainer2" type="MarginContainer" parent="UI_spectating"]
-margin_right = 171.0
-margin_bottom = 47.0
+margin_right = 409.0
+margin_bottom = 118.0
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
 custom_constants/margin_left = 10
@@ -50,20 +52,27 @@ __meta__ = {
 [node name="VBoxContainer" type="VBoxContainer" parent="UI_spectating/MarginContainer2"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 161.0
-margin_bottom = 38.0
-custom_constants/separation = 5
+margin_right = 399.0
+margin_bottom = 108.0
+custom_constants/separation = 10
 
-[node name="PanelContainer2" type="PanelContainer" parent="UI_spectating/MarginContainer2/VBoxContainer"]
-margin_right = 151.0
+[node name="HBoxContainer" type="HBoxContainer" parent="UI_spectating/MarginContainer2/VBoxContainer"]
+margin_right = 389.0
 margin_bottom = 28.0
+custom_constants/separation = 10
 
-[node name="Label" type="Label" parent="UI_spectating/MarginContainer2/VBoxContainer/PanelContainer2" groups=[
+[node name="PanelContainer2" type="PanelContainer" parent="UI_spectating/MarginContainer2/VBoxContainer/HBoxContainer"]
+margin_right = 189.0
+margin_bottom = 28.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="UI_spectating/MarginContainer2/VBoxContainer/HBoxContainer/PanelContainer2" groups=[
 "UI_gamemode",
 ]]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 144.0
+margin_right = 182.0
 margin_bottom = 21.0
 text = "LOBBY"
 align = 1
@@ -71,20 +80,30 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PanelContainer" type="PanelContainer" parent="UI_spectating/MarginContainer2/VBoxContainer"]
-visible = false
-margin_top = 33.0
-margin_right = 151.0
-margin_bottom = 61.0
+[node name="PanelContainer" type="PanelContainer" parent="UI_spectating/MarginContainer2/VBoxContainer/HBoxContainer"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 199.0
+margin_right = 389.0
+margin_bottom = 28.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="UI_spectating/MarginContainer2/VBoxContainer/PanelContainer" groups=[
+[node name="Label" type="Label" parent="UI_spectating/MarginContainer2/VBoxContainer/HBoxContainer/PanelContainer" groups=[
 "UI_spectating",
 ]]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 144.0
+margin_right = 183.0
 margin_bottom = 21.0
 align = 1
+
+[node name="fading-panel" parent="UI_spectating/MarginContainer2/VBoxContainer" groups=[
+"connect_info_panel",
+] instance=ExtResource( 5 )]
+visible = false
+margin_top = 38.0
+margin_right = 389.0
+margin_bottom = 66.0
 
 [node name="UI_main" parent="." instance=ExtResource( 3 )]
 layer = 2

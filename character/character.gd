@@ -27,7 +27,7 @@ export(CONTROL_MODE) var control_mode:int = CONTROL_MODE.kbm_or_gamepad
 #enum STANCE {punching, grabbing, rasengan}
 enum STANCE {punching, grabbing}
 enum STATE {swinging, throwing1, throwing2}
-enum MOUSE_INPUT {attack, block, withdraw}
+enum MOUSE_INPUT {attack, withdraw}
 var mouse_input: int = MOUSE_INPUT.withdraw
 
 var outwards: bool = false
@@ -177,20 +177,18 @@ var attack_timer = 0
 var attack_timer_max = 1.25
 
 
+var physics_proc_delta = 0
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
-#	if not self.is_in_group("owned"):
-#		print($hand.global_position)
+	physics_proc_delta = delta
+
 	if free_swing == false:
 		mouse_input = MOUSE_INPUT.withdraw
 
 
 	# HAND
 	# overheat BS
-	# mongrel
-#	if self.is_in_group("owned"):
-#		Global.online.dbset("amongrel "+ str(MOUSE_INPUT.attack))
-#		Global.online.dbline("mode " +str(NET_MODE.keys()[net_mode]))
 #	if (net_mode == NET_MODE.own_on_host or net_mode == NET_MODE.other_on_host):
 	if true:
 		if mouse_input == MOUSE_INPUT.attack && attack_timer < attack_timer_max+0.10:
@@ -218,7 +216,7 @@ func _physics_process(delta):
 		outwards = false
 		if $hand.linear_velocity.dot(return_vec) < 0: outwards = true
 		towards_enemy = false
-		if $hand.linear_velocity.dot(target_vec) > 0: towards_enemy = true	
+		if $hand.linear_velocity.dot(target_vec) > 0: towards_enemy = true
 	
 		# mass boost
 		$hand.offensive_arc = towards_enemy && outwards
@@ -238,64 +236,16 @@ func _physics_process(delta):
 		var new_vec: Vector2 = target_b_pos - $body.global_position 
 		# attack
 		if mouse_input == MOUSE_INPUT.attack:
-			# position drag
-			### poggers	
-			$hand.should_drag = true
-			$hand.drag_return_vec = return_vec
-			$hand.drag_amount = drag_amount
-			$hand.delta = delta
-#			$hand.global_position += return_vec*drag_amount*delta
-		
+
 			var att_str = punch_force
 			$hand.punch_force += new_vec.normalized()*att_str* delta
 			
 			$hand.punch_force += oscill_xn* return_vec.normalized() *oscillator_force
 		
-		# block
-#		elif mouse_input == MOUSE_INPUT.block:
-#			# block position
-#			var block_pos = $body.global_position + (target_b_pos - $body.global_position).normalized()*100
-#			$test.global_position = block_pos
-#			var block_ret_vec = block_pos - $hand.global_position
-#			# position drag
-#			$hand.global_position += block_ret_vec*drag_amount*2.0*delta
-#			var att_str = punch_force
-#			$hand.punch_force += new_vec.normalized()*att_str*0.5* delta
-#
-#			$hand.punch_force += oscill_xn* return_vec.normalized() *oscillator_force
-#			$hand.mass = hand_base_mass*10.0
-#			self.attack_disabled = true
-#			self.attack_disabled = true
-		
 		elif mouse_input == MOUSE_INPUT.withdraw:
-			# position drag
-			### poggers
-			$hand.should_drag = true
-			$hand.drag_return_vec = return_vec
-			$hand.drag_amount = drag_amount
-			$hand.delta = delta
-#			$hand.global_position += return_vec*drag_amount*delta
 			# base oscillator force for returning home
 			$hand.punch_force += oscill_xn* return_vec.normalized() *oscillator_force
 	
-
-			#remember gravity scale 16
-#
-#		if state == STATE.throwing1:
-#			release_timer += delta
-#			if release_timer >= release1_wait:
-#				release1(body_getting_grabbed_by_self)
-#		if state == STATE.throwing2:
-#			release_timer += delta
-#			if release_timer >= release2_wait:
-#				release2(body_getting_grabbed_by_self)
-#
-#		if self.falling_from_throw == true:
-#			fall_timer += delta
-#			if fall_timer >= falling_from_throw_wait:
-#				self.falling_from_throw = false
-#				fall_timer = 0
-		
 		#body physics
 				
 		# jump adjustment
@@ -306,28 +256,6 @@ func _physics_process(delta):
 			height = $body.global_position.y
 			
 			body_force = Vector2(0,0)
-	#
-	#		if (self.being_grabbed == true):
-	#			# dragged by enemy grabbing hand
-	#			var grab_return_vec = enemy_grabbing_hand.global_position - $body.global_position
-	#			if enemy_grabbing_hand.owner.airborne == true:
-	#				body_force += (grab_return_vec*750 - $body.linear_velocity.normalized() * 5)*global_throw_nerf * 0.05
-	#				print("denied! ")
-	#			else:
-	#				body_force += (grab_return_vec*750 - $body.linear_velocity.normalized() * 5) *global_throw_nerf
-	#
-	#			# self pull
-	#			var holding_on_return_vec = enemy_grabbing_hand.global_position - enemy_grabbing_hand.owner.get_node("body").global_position
-	#			if enemy_grabbing_hand.owner.airborne == true:
-	#				enemy_grabbing_hand.owner.body_force += (holding_on_return_vec*750 - $body.linear_velocity.normalized() * 10) *0.3
-	#			else:
-	#				enemy_grabbing_hand.owner.body_force += (holding_on_return_vec*750 - $body.linear_velocity.normalized() * 10) *0.05
-		#	print("holding on... force ", -grab_return_vec*750 )
-		#			print(enemy_grabbing_hand.owner, enemy_grabbing_hand.owner.airborne == true)
-					
-	#		else:
-				# walking
-				# x
 		
 			var x_force = 0
 			var y_force = 0
@@ -352,21 +280,8 @@ func _physics_process(delta):
 
 				
 			body_force += Vector2(x_force, y_force)
-	#		print($body.linear_velocity.y)
 			$body.applied_force = body_force
 	
-
-
-
-#
-#	if stance == STANCE.grabbing:
-#		$hand.collision_mask = 2 # remove collisions with bodies (finger does it)
-#	else:
-#		$hand.collision_mask = 3
-#	if stance == STANCE.grabbing && state == STATE.swinging:
-#		$hand/fingers.collision_mask = 11 # enable fingers
-#	else:
-#		$hand/fingers.collision_mask = 0 # disable fingers
 
 
 
@@ -413,8 +328,7 @@ func die():
 			if elim_lives >= 1:
 				$RespawnTimer.start(respawn_wait_time)
 				if self.is_in_group("owned"):
-					Global.spect_label.text = "RESPAWNING..."
-					Global.spect_label.get_parent().visible = true
+					update_spect_label("RESPAWNING...", true)
 			else:
 				change_spectator_mode(true)
 				Global.online.check_winner()
@@ -584,8 +498,7 @@ func set_name(name):
 
 func respawn():
 	if self.is_in_group("owned"):
-		Global.spect_label.text = ""
-		Global.spect_label.get_parent().visible = false
+		update_spect_label("", false)
 #	if self.is_in_group("owned"):
 	print("CALLING a respawn. ", self, " ", self.base_name)
 	
@@ -701,17 +614,21 @@ func change_spectator_mode(newval):
 		self.visible = true
 	
 	if self.is_in_group("owned"):
-		if newval == true && Global.spect_label.text != "WAITING FOR NEXT GAME...":
-			Global.spect_label.text = "SPECTATING"
-			Global.spect_label.get_parent().visible = true
+		if newval == true:
+			update_spect_label("SPECTATING", true)
 
 
 func set_waiting_for_next_game(newval):
 	waiting_for_next_game = newval
 	if waiting_for_next_game == true:
-		Global.spect_label.text = "WAITING FOR NEXT GAME..."
-		Global.spect_label.get_parent().visible = true
+		update_spect_label("WAITING FOR NEXT GAME", true)
 
+func update_spect_label(text: String, visible: bool):
+	Global.spect_label.text = text
+	if visible == false:
+		Global.spect_label.get_parent().modulate = Color("00ffffff")
+	else:
+		Global.spect_label.get_parent().modulate = Color("ffffffff")
 
 func hide_lives():
 	$body/g/UI/Label.visible = false

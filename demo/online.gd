@@ -8,6 +8,7 @@ signal joined_game
 signal left_game
 
 onready var own_char = get_tree().get_nodes_in_group("owned")[0]
+onready var connect_info_panel = get_tree().get_nodes_in_group("connect_info_panel")[0]
 
 enum NET_MODE {own_on_host, other_on_host, own_on_client, other_on_client}
 var chars_by_id = {}
@@ -46,8 +47,12 @@ func _physics_process(delta):
 				# client is joining, spawn his character
 				var char_data = JSON.parse(message).result
 				var spect_mode = !Global.is_game_mode_open()
-				print("baj joined: his spect mode is...", spect_mode)
 				spawn_char(char_data, sender_id, NET_MODE.other_on_host, spect_mode)
+				if spect_mode == true:
+					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
+				else:
+					connect_info_panel.appear("player "+char_data.name+" joined" )
+					
 			elif code == "I":
 				# client is sending his input
 				var remote_input = JSON.parse(message).result
@@ -73,7 +78,11 @@ func _physics_process(delta):
 				# another client is joining, spawn his character
 				var char_data = JSON.parse(message).result
 				var spect_mode = not Global.is_game_mode_open()
-				print("baj joined: his spect mode is...", spect_mode)
+				if spect_mode == true:
+					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
+				else:
+					connect_info_panel.appear("player "+char_data.name+" joined" )
+					
 				spawn_char(char_data, sender_id, NET_MODE.other_on_client, spect_mode)
 			elif code == "G":
 				# host is sending game mode info
@@ -87,6 +96,12 @@ func _physics_process(delta):
 				Global.update_game_info(new_game_info)
 				own_char.spectator_mode = not Global.is_game_mode_open()
 				own_char.waiting_for_next_game = not Global.is_game_mode_open()
+				
+				if not Global.is_game_mode_open():
+					connect_info_panel.appear("joined as spectator (game already in progress)" )
+				else:
+					connect_info_panel.appear("joined lobby" )
+					
 				
 	# send packets
 	if host == true && connected == true:
@@ -208,8 +223,7 @@ func _mp_peer_connected(id: int):
 	# so that the client can run setup_chars_for_new_gamemode() 
 	# at the end of the "H" message
 	# send data about characters on host to the newly connected player
-	dbclear()
-	dbline("CONNECTED WITH ID "+str(id))
+
 	var keys = chars_by_id.keys()
 	var chars_data = {}
 	for k in keys:
@@ -217,7 +231,7 @@ func _mp_peer_connected(id: int):
 			chars_data[k] = chars_by_id[k].get_character_data()
 	var jstr = JSON.print(chars_data)
 	client.rtc_mp.put_packet(("H"+jstr).to_utf8())
-	# then, in _process, we will receive data about the connected client's char
+	# then, in _process, the host will receive data about the connected client's char
 	
 	_log("Multiplayer peer %d connected" % id)
 
@@ -263,8 +277,6 @@ func setup_chars_for_new_gamemode(joined_mid = false):
 		for k in chars_by_id.keys():
 			if chars_by_id[k].waiting_for_next_game == true:
 				if joined_mid:
-					if !chars_by_id[k].is_in_group("owned"):
-						print("skipping")
 					continue
 			chars_by_id[k].elim_lives = new_elim_lives
 			chars_by_id[k].respawn()

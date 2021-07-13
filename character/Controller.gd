@@ -9,7 +9,7 @@ var attack_timer = 0
 # var a = 2
 onready var pawn = self.get_parent()
 var net_client
-var input = [ 0, 0, 2, 0, 0.000, 0.000 ]
+var input = [ 0, 0, 1, 0, 0.000, 0.000 ]
 # [ move_x(-1,0,1), move_y(-1,0,1), attack(0,1), stance(INT), target_x(FLOAT), target_y(FLOAT) ]  
 # this is still converted to variables with the same meaning in character.gd. 
 # this is out of laziness, but will probably be good if bots are added.
@@ -21,23 +21,14 @@ const TARGET_X = 4
 const TARGET_Y = 5
 
 
-func _physics_process(delta):
-	pass
-
-#	var bdrg = 4.85
-#	pawn.drag_amount = lerp(5.0*bdrg, bdrg, efficiency)
-#	print(pawn.drag_amount)
-
 
 
 func _input(event):
-#	if pawn.remote_char_on_client == false && pawn.remote_char_on_host == false:
 	if pawn.spectator_mode == false:
 		if pawn.net_mode == pawn.NET_MODE.own_on_host:
 				convert_event(event)
 				handle_input(input)
-	#	elif pawn.remote_char_on_client == true:
-		if pawn.net_mode == pawn.NET_MODE.own_on_client:
+		elif pawn.net_mode == pawn.NET_MODE.own_on_client:
 			# convert_event will store the input in "input" and do nothing.
 			# the network client class will have to fetch the input from here 
 			# and send it over to the host.
@@ -99,11 +90,7 @@ func convert_event(event):
 					input[ATTACK] = pawn.MOUSE_INPUT.attack
 				if not event.is_pressed():  # Mouse button released.
 					input[ATTACK] = pawn.MOUSE_INPUT.withdraw
-			elif event.button_index == BUTTON_RIGHT:
-				if event.is_pressed():  # Mouse button down.
-					input[ATTACK] = pawn.MOUSE_INPUT.block
-				if not event.is_pressed():  # Mouse button released.
-					input[ATTACK] = pawn.MOUSE_INPUT.withdraw
+
 
 		
 		input[MOVE_X] = 0

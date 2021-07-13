@@ -217,10 +217,10 @@ __meta__ = {
 }
 
 [node name="ColorPicker" type="ColorPicker" parent="UI_main/customize_vbox"]
-margin_left = 36.0
-margin_top = 127.0
-margin_right = 375.0
-margin_bottom = 589.0
+margin_left = 40.0
+margin_top = 131.0
+margin_right = 379.0
+margin_bottom = 593.0
 
 [node name="back_button3" type="Button" parent="UI_main/customize_vbox"]
 margin_top = 593.0
@@ -249,10 +249,10 @@ __meta__ = {
 }
 
 [node name="ColorPicker" type="ColorPicker" parent="UI_main/training_vbox"]
-margin_left = 40.0
-margin_top = 131.0
-margin_right = 379.0
-margin_bottom = 593.0
+margin_left = 44.0
+margin_top = 135.0
+margin_right = 383.0
+margin_bottom = 597.0
 
 [node name="back_button3" type="Button" parent="UI_main/training_vbox"]
 margin_top = 593.0
