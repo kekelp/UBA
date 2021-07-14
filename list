@@ -66,7 +66,7 @@ Also, Vector2 don't really work (as values), they get reconverted to a string, b
 
 protocol:
 
-utf8 packages.
+utf8 packets.
 
 first letter is the code describing the message type.
 the rest is either JSON (to be converted to a Godot dict), or a string to be converted to floats.
@@ -89,20 +89,26 @@ Note: the J and H packets are redundant, in the sense that if the host processes
 his own J, then the second client will get two requests to spawn the first client's character. This is not a proble because I can just
 check chars_by_id.has(id) to avoid spawning duplicate characters. 
 
-Probably needs a bunch more:
 
-- a client changed its name or color
-- all the ones for stances and shit
+----- plan:
 
+unify waiting_for_next_game and spect_mode into a single enum and give it a set func
+
+change spawn_char to also set the new spect enum
+
+make it so the "H" packet also updates the params of the client's already existing own char
+
+remove "M" and just use "G" 
 
 
 ----- next: -------
 
+    changing mode from elim to lobby when host quits should remove the lives counter
+
     mind the fact that the body Sprite is now a child of the /g/ node
 
-    uncomment drag_amount line?
 
-    scoreboards and shit
+    scoreboards and stuff
 
     death VFX
 

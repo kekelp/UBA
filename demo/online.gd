@@ -168,23 +168,7 @@ func _mp_connected():
 func _mp_server_disconnect():
 	if host == false:
 		leave_game()
-#		# remove all remote chars
-#		for k in chars_by_id.keys():
-#				if chars_by_id.has(k) == true:
-#					if chars_by_id[k] != own_char:
-#						chars_by_id[k].queue_free()
-#						chars_by_id.erase(k)
-#		# stop being a client char 
-#		own_char.net_mode = NET_MODE.own_on_host
-#	emit_signal("left_game")
 
-#
-#func _disconnected():
-#	pass
-#
-##	leave_game()
-##		_log("Signaling server disconnected: %d - %s" % [client.code, client.reason])
-#		emit_signal("left_game")
 
 func leave_game():
 	connected = false
