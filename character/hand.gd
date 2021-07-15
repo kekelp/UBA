@@ -13,6 +13,8 @@ var should_drag = true
 var drag_return_vec
 var drag_amount = 4.85
 
+var idle_frames = 0
+
 onready var base_y_scale = $g/Sprite.scale.y
 
 # Called when the node enters the scene tree for the first time.
@@ -33,12 +35,28 @@ func _process(_delta):
 		$g/Sprite.scale.y = -base_y_scale
 
 func _integrate_forces(state):
-	var total_force = (punch_force) * mass *0.5
-	set_applied_force(total_force)
+
+	print(state.transform.origin)
 	if should_reset:
+		print("KYSKYSKYSKYS")
 		state.transform.origin = reset_pos
 		should_reset = false
-	elif should_drag:
+	if should_drag:
 		var drag_return_vec: Vector2 = $"../body".global_position - self.global_position
 		if (get_parent().net_mode == get_parent().NET_MODE.own_on_host || get_parent().net_mode == get_parent().NET_MODE.other_on_host ):
 			state.transform.origin += drag_return_vec*drag_amount*get_parent().physics_proc_delta
+	
+	if idle_frames > 0:
+		idle_frames -= 1
+#		linear_velocity = Vector2(0,0)
+	
+	var total_force = (punch_force) * mass *0.5
+	set_applied_force(total_force)
+
+
+
+func teleport(new_pos: Vector2):
+	reset_pos = new_pos
+	should_reset = true
+	idle_frames = 10
+	linear_velocity = Vector2(0,0)

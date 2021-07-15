@@ -72,7 +72,7 @@ func _process(delta):
 
 		var uncorr_target_x = -(character_pos.global_position.x - get_viewport().size.x/2)
 	
-		if character.get_parent().spectator_mode == false:
+		if character.get_parent().spectating == false:
 			# deadzone
 			var uncorr_x_diff = uncorr_target_x - previous_frame_view_x
 			if uncorr_x_diff < 0:
@@ -93,7 +93,7 @@ func _process(delta):
 			var target_x_mouse_corr = (pow(abs(mouse_offcenter.x), 1.5)*view_size.x*0.27)
 			target_x -= signum *target_x_mouse_corr
 		
-		else: # if character.spectator_mode == true:
+		else: # if character.spectating == true:
 			if Input.is_action_pressed("move_right"):
 				target_x += - spectate_pan_speed * delta
 			if Input.is_action_pressed("move_left"):

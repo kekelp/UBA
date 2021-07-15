@@ -103,6 +103,8 @@ remove "M" and just use "G"
 
 ----- next: -------
 
+    input sticking for that guy
+
     changing mode from elim to lobby when host quits should remove the lives counter
 
     mind the fact that the body Sprite is now a child of the /g/ node

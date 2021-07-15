@@ -9,12 +9,13 @@ export var free_movement = true
 export var free_swing = true
 
 var elim_lives = 5
- 
+
 
 var char_id
 
-var waiting_for_next_game = false setget set_waiting_for_next_game
-var spectator_mode = false setget change_spectator_mode
+enum ACTIVE_MODE {playing, respawning, waiting_next_game}
+var active_mode:int = ACTIVE_MODE.playing setget change_active_mode
+var spectating = false setget change_spectating
 
 enum NET_MODE {own_on_host, other_on_host, own_on_client, other_on_client}
 export (NET_MODE) var net_mode setget change_net_mode
@@ -269,7 +270,7 @@ func _process(delta):
 	# fix body rotation
 	$body/g.rotation = -$body.rotation
 	
-	if spectator_mode == false:
+	if spectating == false:
 		if $body.global_position.x < spectator_place - 500:
 			if $body.global_position.y < arena.get_node("die_top").global_position.y:
 				die()
@@ -296,8 +297,6 @@ func _process(delta):
 
 func die():
 	if (dead == false):
-		print("dying")
-		print("   ", $body.global_position)
 		dead = true
 		if Global.game_mode == Global.GAME_MODE.lobby:
 			$RespawnTimer.start(respawn_wait_time_lobby)
@@ -305,10 +304,9 @@ func die():
 			elim_lives -= 1
 			if elim_lives >= 1:
 				$RespawnTimer.start(respawn_wait_time)
-				if self.is_in_group("owned"):
-					update_spect_label("RESPAWNING...", true)
+				change_active_mode(ACTIVE_MODE.respawning)
 			else:
-				change_spectator_mode(true)
+				change_active_mode(ACTIVE_MODE.waiting_next_game)
 				Global.online.check_winner()
 
 
@@ -388,8 +386,6 @@ func set_name(name):
 func respawn():
 	if self.is_in_group("owned"):
 		update_spect_label("", false)
-#	if self.is_in_group("owned"):
-	print("CALLING a respawn. ", self, " ", self.base_name)
 	
 	$body/g/UI/Label.text = str(elim_lives)
 	
@@ -403,24 +399,20 @@ func respawn():
 		var right_x = arena.get_node("spawn-right").global_position.x
 		var spw_y = arena.get_node("spawn-left").global_position.y
 		randomize()
-		teleport( Vector2( rand_range(left_x, right_x)  , spw_y))
-		$body.linear_velocity = Vector2(0,0)
-		$hand.linear_velocity = Vector2(0,0)
+		var reset_pos = ( Vector2( rand_range(left_x, right_x)  , spw_y))
+		$body.teleport(reset_pos)
+		$hand.teleport(reset_pos)
+
 	else:
-		change_spectator_mode(false)
+		change_active_mode(ACTIVE_MODE.playing)
 		respawning = false
-		waiting_for_next_game = false
 	
 	self.damage_taken = almost_zero
 	self.update_damage_debuff()
 
 
 
-func teleport(new_pos):
-	$body.should_reset = true
-	$body.reset_pos = new_pos
-	$hand.should_reset = true
-	$hand.reset_pos = new_pos + $hand.rest_pos
+
 
 func _on_RespawnTimer_timeout():
 	respawn() # Replace with function body.
@@ -429,19 +421,13 @@ func get_character_data():
 	var c_data = {}
 	c_data.name = ($body/g/UI/name.text)
 	c_data.color = Color($body/g/Sprite.modulate).to_html()
-	c_data.spect_mode = spectator_mode
-	c_data.waiting_for_next_game = waiting_for_next_game
 	return c_data.duplicate()
 
 
 func set_character_data(c_data):
 	set_name(c_data.name)
 	set_color(c_data.color)
-	change_spectator_mode(c_data.spect_mode)
-	waiting_for_next_game = c_data.waiting_for_next_game
 
-
-### new and good
 func get_character_position():
 	var c_pos = []
 	c_pos.push_back($hand.global_position.x)
@@ -473,8 +459,6 @@ func sync_position(c_pos):
 #	if body_step.length() > bigstep:
 #		$body/g/Sprite.position += lesign*body_step *sync_drag
 #
-	
-	
 	# sync
 	$hand.global_position.x = c_pos[0]
 	$hand.global_position.y = c_pos[1]
@@ -488,29 +472,60 @@ func sync_position(c_pos):
 	$body.linear_velocity.y = c_pos[9]
 	
 
+func change_active_mode(newval):
+	active_mode = newval
+	if newval == ACTIVE_MODE.respawning:
+		if self.is_in_group("owned"):
+			if Global.game_mode != Global.GAME_MODE.lobby:
+				change_spectating(true)
+				update_spect_label("RESPAWNING...", true)
+	elif newval == ACTIVE_MODE.waiting_next_game:
+		change_spectating(true)
+		if self.is_in_group("owned"):
+			update_spect_label("WAITING FOR NEXT GAME...", true)
+	elif newval == ACTIVE_MODE.playing:
+		change_spectating(false)
+		if self.is_in_group("owned"):
+			update_spect_label("", false)
 
-func change_spectator_mode(newval):
-	spectator_mode = newval
+func change_spectating(newval):
+	spectating = newval
 	if newval == true:
 		$body.gravity_scale = 0
 		self.visible = false
-	
+		
 		self.global_position.x = spectator_place
 		self.global_position.y = spectator_place
 	
 	elif newval == false:
 		$body.gravity_scale = base_gravity
 		self.visible = true
-	
-	if self.is_in_group("owned"):
-		if newval == true:
-			update_spect_label("SPECTATING", true)
+		
+		self.global_position.x = 0
+		self.global_position.y = 0
 
-
-func set_waiting_for_next_game(newval):
-	waiting_for_next_game = newval
-	if waiting_for_next_game == true:
-		update_spect_label("WAITING FOR NEXT GAME", true)
+#func change_spectator_mode(newval):
+#	spectator_mode = newval
+#	if newval == true:
+#		$body.gravity_scale = 0
+#		self.visible = false
+#
+#		self.global_position.x = spectator_place
+#		self.global_position.y = spectator_place
+#
+#	elif newval == false:
+#		$body.gravity_scale = base_gravity
+#		self.visible = true
+#
+#	if self.is_in_group("owned"):
+#		if newval == true:
+#			update_spect_label("SPECTATING", true)
+#
+#
+#func set_waiting_for_next_game(newval):
+#	waiting_for_next_game = newval
+#	if waiting_for_next_game == true:
+#		update_spect_label("WAITING FOR NEXT GAME", true)
 
 func update_spect_label(text: String, visible: bool):
 	Global.spect_label.text = text
@@ -531,6 +546,6 @@ func show_lives():
 #	if event is InputEventMouseButton:
 #		if event.is_pressed():
 #			var tvec = get_viewport().get_mouse_position() - get_viewport().get_canvas_transform().get_origin()
-#			if not self.is_in_group("owned"):
-#				$body.global_position = tvec
+#			if self.is_in_group("owned"):
+#				$hand.teleport(tvec)
 

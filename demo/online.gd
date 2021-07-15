@@ -302,7 +302,6 @@ func spawn_char(char_data, owner_id, net_mode, spect_mode):
 		var character = CHARACTER.instance()
 		self.add_child(character)
 		character.set_character_data(char_data)
-		character.spectator_mode = spect_mode
 		character.net_mode = net_mode
 		character.control_mode = character.CONTROL_MODE.kbm_or_gamepad
 		chars_by_id[str(owner_id)] = character
