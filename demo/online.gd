@@ -47,12 +47,36 @@ func _physics_process(delta):
 				# client is joining, spawn his character
 				var char_data = JSON.parse(message).result
 				var spect_mode = !Global.is_game_mode_open()
-				spawn_char(char_data, sender_id, NET_MODE.other_on_host, spect_mode)
+				# correct char_data coming from client
+				char_data[]
+				# TODO
+				spawn_char(char_data, sender_id, NET_MODE.other_on_host)
 				if spect_mode == true:
 					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
 				else:
 					connect_info_panel.appear("player "+char_data.name+" joined" )
-					
+				
+				# reply with a nice and exhaustive "H" message
+				client.rtc_mp.set_target_peer(sender_id)
+				# game info
+				var game_info = Global.get_game_info()
+				# info about all characters including the client's newly spawned one
+				var keys = chars_by_id.keys()
+				var chars_data = {}
+				for k in keys:
+						chars_data[k] = chars_by_id[k].get_character_data()
+				# combine dicts and send
+				var all_info = {}
+				all_info["g"] = game_info
+				all_info["c"] = chars_data
+				var jstr = JSON.print(all_info)
+				print("all_info ",all_info)
+				print("jstr ", jstr)
+				client.rtc_mp.put_packet(("H"+jstr).to_utf8())
+
+				
+				
+				
 			elif code == "I":
 				# client is sending his input
 				var remote_input = JSON.parse(message).result
@@ -60,11 +84,17 @@ func _physics_process(delta):
 				sender_char.get_node("Controller").handle_input(remote_input)
 		elif host == false:
 			if code == "H":
+				# unpack the message
+				var all_info = JSON.parse(message).result
+				var game_info = all_info["g"]
+				var chars_data_by_id = all_info["c"]
+				# update game mode
+				Global.update_game_info(game_info)
+				# go through all characters
+				# update own char's data TODO
 				# spawn the images for all of the chars on host
-				var chars_data_by_id = JSON.parse(message).result
-				dbclear()
 				for id in chars_data_by_id:
-					spawn_char(chars_data_by_id[id], id, NET_MODE.other_on_client, false)
+					spawn_char(chars_data_by_id[id], id, NET_MODE.other_on_client)
 				setup_chars_for_new_gamemode(own_char.waiting_for_next_game)
 			elif code == "P":
 				# host is sending the positions of all characters
@@ -82,14 +112,17 @@ func _physics_process(delta):
 					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
 				else:
 					connect_info_panel.appear("player "+char_data.name+" joined" )
-					
-				spawn_char(char_data, sender_id, NET_MODE.other_on_client, spect_mode)
+				# either correct data such as spect_mode based on gamemode, or just
+				#     scrap this and let host announce the new joining guy to everyone with corrected stats
+				#     TODO  
+				spawn_char(char_data, sender_id, NET_MODE.other_on_client)
 			elif code == "G":
-				# host is sending game mode info
+				# host is starting a new game and sending game mode info
 				var new_game_info = JSON.parse(message).result
 				Global.update_game_info(new_game_info)
-				print("RECEIVING ", new_game_info["mode"])
 				setup_chars_for_new_gamemode(false)
+				
+			# DELETE THIS TODO
 			elif code == "M":
 				# we joined mid-game so host is sending game mode info
 				var new_game_info = JSON.parse(message).result
@@ -200,23 +233,27 @@ func send_current_game_info():
 
 func _mp_peer_connected(id: int):
 	### will run on host side whenever a client connects. 
-	client.rtc_mp.set_target_peer(id)
-	# send him info about the currently running game
-	send_current_game_info()
-	# it's important that game info is sent before character info,
-	# so that the client can run setup_chars_for_new_gamemode() 
-	# at the end of the "H" message
-	# send data about characters on host to the newly connected player
-
-	var keys = chars_by_id.keys()
-	var chars_data = {}
-	for k in keys:
-		if k != str(id):
-			chars_data[k] = chars_by_id[k].get_character_data()
-	var jstr = JSON.print(chars_data)
-	client.rtc_mp.put_packet(("H"+jstr).to_utf8())
-	# then, in _process, the host will receive data about the connected client's char
 	
+	# actually do nothing. wait for the client to send info about his character,
+	# then reply to that.
+#
+#	client.rtc_mp.set_target_peer(id)
+#	# send him info about the currently running game
+#	send_current_game_info()
+#	# it's important that game info is sent before character info,
+#	# so that the client can run setup_chars_for_new_gamemode() 
+#	# at the end of the "H" message
+#	# send data about characters on host to the newly connected player
+#
+#	var keys = chars_by_id.keys()
+#	var chars_data = {}
+#	for k in keys:
+#		if k != str(id):
+#			chars_data[k] = chars_by_id[k].get_character_data()
+#	var jstr = JSON.print(chars_data)
+#	client.rtc_mp.put_packet(("H"+jstr).to_utf8())
+#	# then, in _process, the host will receive data about the connected client's char
+#
 	_log("Multiplayer peer %d connected" % id)
 
 func check_for_full_lobby():
@@ -280,23 +317,18 @@ func ping():
 
 
 
-func start():
-	client.start($VBoxContainer/Connect/Host.text, $VBoxContainer/Connect/RoomSecret.text)
-
 func create_game():
 	client.start(Global.matchmatking_server_url, "")
 
 func join_game():
 	client.start(Global.matchmatking_server_url, Global.room_code)
 
-func _on_Seal_pressed():
-	client.seal_lobby()
 
 func stop():
 	client.stop()
 	leave_game()
 
-func spawn_char(char_data, owner_id, net_mode, spect_mode):
+func spawn_char(char_data, owner_id, net_mode):
 
 	if chars_by_id.has(str(owner_id)) == false:
 		var character = CHARACTER.instance()
@@ -305,21 +337,8 @@ func spawn_char(char_data, owner_id, net_mode, spect_mode):
 		character.net_mode = net_mode
 		character.control_mode = character.CONTROL_MODE.kbm_or_gamepad
 		chars_by_id[str(owner_id)] = character
-		if host == true:
-			check_for_full_lobby()
 
-onready var label = get_tree().get_nodes_in_group("debug")[0]
-func dbline(message):
-	if OS.is_debug_build():
-		label.text += (str(message)+"\n")
 
-func dbset(message):
-	if OS.is_debug_build():
-		label.text = (str(message)+"\n")
-
-func dbclear():
-	if OS.is_debug_build():
-		label.text += "\n"
 
 const ANNOUNCE_BANNER = preload("res://UI/announce_banner.tscn")
 func announce(message):
@@ -347,6 +366,23 @@ func declare_winner(winner):
 func declare_no_winners():
 	dbclear()
 	announce(" NO SURVIVORS!")
+
+
+####### debug
+
+onready var label = get_tree().get_nodes_in_group("debug")[0]
+func dbline(message):
+	if OS.is_debug_build():
+		label.text += (str(message)+"\n")
+
+func dbset(message):
+	if OS.is_debug_build():
+		label.text = (str(message)+"\n")
+
+func dbclear():
+	if OS.is_debug_build():
+		label.text += "\n"
+
 
 func _input(event):
 	

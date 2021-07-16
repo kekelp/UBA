@@ -403,9 +403,8 @@ func respawn():
 		$body.teleport(reset_pos)
 		$hand.teleport(reset_pos)
 
-	else:
-		change_active_mode(ACTIVE_MODE.playing)
-		respawning = false
+	change_active_mode(ACTIVE_MODE.playing)
+	respawning = false
 	
 	self.damage_taken = almost_zero
 	self.update_damage_debuff()

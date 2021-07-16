@@ -114,6 +114,7 @@ func start_game():
 	self.game_mode = selected_game_mode
 	online.host_start_game()
 
+
 # this sounds stupid but it has to be serialized
 func get_game_info():
 	var game_info = {}

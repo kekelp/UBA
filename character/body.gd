@@ -17,7 +17,6 @@ func _integrate_forces(state):
 	if should_reset == true:
 		state.transform.origin = reset_pos
 		should_reset = false
-		get_parent().change_active_mode(get_parent().ACTIVE_MODE.playing)
 
 func teleport(new_pos: Vector2):
 	should_reset = true

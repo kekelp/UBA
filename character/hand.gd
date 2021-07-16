@@ -36,9 +36,7 @@ func _process(_delta):
 
 func _integrate_forces(state):
 
-	print(state.transform.origin)
 	if should_reset:
-		print("KYSKYSKYSKYS")
 		state.transform.origin = reset_pos
 		should_reset = false
 	if should_drag:
@@ -46,17 +44,11 @@ func _integrate_forces(state):
 		if (get_parent().net_mode == get_parent().NET_MODE.own_on_host || get_parent().net_mode == get_parent().NET_MODE.other_on_host ):
 			state.transform.origin += drag_return_vec*drag_amount*get_parent().physics_proc_delta
 	
-	if idle_frames > 0:
-		idle_frames -= 1
-#		linear_velocity = Vector2(0,0)
-	
 	var total_force = (punch_force) * mass *0.5
 	set_applied_force(total_force)
-
 
 
 func teleport(new_pos: Vector2):
 	reset_pos = new_pos
 	should_reset = true
-	idle_frames = 10
 	linear_velocity = Vector2(0,0)

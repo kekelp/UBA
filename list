@@ -92,16 +92,32 @@ check chars_by_id.has(id) to avoid spawning duplicate characters.
 
 ----- plan:
 
-unify waiting_for_next_game and spect_mode into a single enum and give it a set func
+move stuff in _mp_peer_connected into when reading the client's "J" packet 
 
-change spawn_char to also set the new spect enum
+make it so the "H" packet also includes info about the game ("G") and other stuff about the lobby like max players 
 
-make it so the "H" packet also updates the params of the client's already existing own char
+make it so that when reading the "H" packet, all information gets synced:
+    update the params of the client's already existing own char, 
+    sync gamemode/max players, 
+    remove extra chars (this is not actually needed but just saying
 
-remove "M" and just use "G" 
+maybe change client-to-client "J" message, either have the host send it after reading the client-to-host "J"
+    it might be fine as it is but needs some thinking 
+
+
+remove "M" and just use "G" (or "H" ?) 
+
+
+
+
 
 
 ----- next: -------
+    add the "other stuff about the lobby like max players" to the "H" message (both send and receive)
+
+    think about disabling the dragging stuff in hand.gd for chars on client
+
+    redo lobby sealing
 
     input sticking for that guy
 
@@ -121,6 +137,8 @@ remove "M" and just use "G"
 
 
     ----- after: -------
+    
+    
     
     le big hands??
 
