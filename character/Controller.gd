@@ -22,7 +22,6 @@ const TARGET_Y = 5
 
 
 
-
 func _input(event):
 	if pawn.spectating == false:
 		if pawn.net_mode == pawn.NET_MODE.own_on_host:

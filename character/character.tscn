@@ -24,6 +24,11 @@ radius = 16.6596
 
 [sub_resource type="SpriteFrames" id=4]
 animations = [ {
+"frames": [ ExtResource( 6 ) ],
+"loop": true,
+"name": "punch",
+"speed": 0.0
+}, {
 "frames": [ ExtResource( 7 ) ],
 "loop": true,
 "name": "grab_grip",
@@ -32,11 +37,6 @@ animations = [ {
 "frames": [ ExtResource( 8 ) ],
 "loop": true,
 "name": "grab",
-"speed": 0.0
-}, {
-"frames": [ ExtResource( 6 ) ],
-"loop": true,
-"name": "punch",
 "speed": 0.0
 } ]
 

@@ -124,35 +124,31 @@ remove "M" and just use "G" (or "H" ?)
 
 ----- next: -------
     
-    add reminder for waiting players
     
     purge useless "respawning" variable 
-    
-    cooler return button
     
     wins the game banner not well positioned for small screens
 
     also change name and color if someone has the same (ctrlF this)
 
-    check that passing just "active_mode" in get_char_data is good
+    check that passing just "active_mode" in get_char_data is good --seems good
 
-    add the "other stuff about the lobby like max players" to the "H" message (both send and receive)
-
-    think about disabling the dragging stuff in hand.gd for chars on client
+    add the "other stuff about the lobby like max players" to the "H" message (both send and receive) --this is useless 
 
     redo lobby sealing
 
     input sticking for that guy
 
-    changing mode from elim to lobby when host quits should remove the lives counter
 
-    mind the fact that the body Sprite is now a child of the /g/ node
-
+    add reminder for waiting players
 
     scoreboards and stuff
 
     death VFX
 
+    cooler return button
+    
+    move left that one building in the background
 
     make sure collision detection works on client.
         - red names
@@ -171,8 +167,8 @@ remove "M" and just use "G" (or "H" ?)
     
     max players doesn't do anything yet
     
-
     add gameplay and maps.
+
 
     if platforms are added, add camera stabilization for platforms.
 
