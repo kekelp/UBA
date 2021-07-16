@@ -49,6 +49,6 @@ func _integrate_forces(state):
 
 
 func teleport(new_pos: Vector2):
-	reset_pos = new_pos
+	reset_pos = new_pos + rest_pos
 	should_reset = true
 	linear_velocity = Vector2(0,0)

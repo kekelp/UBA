@@ -10,6 +10,8 @@ signal left_game
 onready var own_char = get_tree().get_nodes_in_group("owned")[0]
 onready var connect_info_panel = get_tree().get_nodes_in_group("connect_info_panel")[0]
 
+
+# THIS HAS TO BE IDENTICAL TO THE ONE IN CHAR
 enum NET_MODE {own_on_host, other_on_host, own_on_client, other_on_client}
 var chars_by_id = {}
 
@@ -46,36 +48,43 @@ func _physics_process(delta):
 			if code == "J":
 				# client is joining, spawn his character
 				var char_data = JSON.parse(message).result
-				var spect_mode = !Global.is_game_mode_open()
-				# correct char_data coming from client
-				char_data[]
-				# TODO
-				spawn_char(char_data, sender_id, NET_MODE.other_on_host)
-				if spect_mode == true:
-					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
-				else:
+				# correct char_data.active_mode coming from client, based on current gamemode:
+				if Global.is_game_mode_open():
+					char_data["active_mode"] = Global.ACTIVE_MODE.playing
 					connect_info_panel.appear("player "+char_data.name+" joined" )
+				else:
+					char_data["active_mode"] = Global.ACTIVE_MODE.waiting_next_game
+					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
+				# TODO also change name and color if someone has the same 
+				
+				spawn_char(char_data, sender_id, NET_MODE.other_on_host)
 				
 				# reply with a nice and exhaustive "H" message
 				client.rtc_mp.set_target_peer(sender_id)
 				# game info
 				var game_info = Global.get_game_info()
 				# info about all characters including the client's newly spawned one
+				#     (since it got corrected)
 				var keys = chars_by_id.keys()
 				var chars_data = {}
 				for k in keys:
-						chars_data[k] = chars_by_id[k].get_character_data()
+					chars_data[k] = chars_by_id[k].get_character_data()
 				# combine dicts and send
 				var all_info = {}
 				all_info["g"] = game_info
 				all_info["c"] = chars_data
 				var jstr = JSON.print(all_info)
-				print("all_info ",all_info)
-				print("jstr ", jstr)
 				client.rtc_mp.put_packet(("H"+jstr).to_utf8())
-
 				
-				
+				# also send out "A" messages to notify all other clients about the new one
+				# (negative sender_id sends to everyone except sender_id)
+				client.rtc_mp.set_target_peer(-sender_id)
+				var sender_data = chars_by_id[str(sender_id)].get_character_data()
+				# also pack in the sender id as a key
+				var sender_data_with_id = {}
+				sender_data_with_id[str(sender_id)] = sender_data
+				var jstr2 = JSON.print(sender_data_with_id)
+				client.rtc_mp.put_packet(("A"+jstr2).to_utf8())
 				
 			elif code == "I":
 				# client is sending his input
@@ -91,11 +100,20 @@ func _physics_process(delta):
 				# update game mode
 				Global.update_game_info(game_info)
 				# go through all characters
-				# update own char's data TODO
 				# spawn the images for all of the chars on host
 				for id in chars_data_by_id:
-					spawn_char(chars_data_by_id[id], id, NET_MODE.other_on_client)
-				setup_chars_for_new_gamemode(own_char.waiting_for_next_game)
+					if chars_by_id.has(id):
+						# own char. do not spawn a duplicate, but update the data 
+						#    for corrections and spect mode
+						chars_by_id[id].set_character_data(chars_data_by_id[id])
+					else:
+						spawn_char(chars_data_by_id[id], id, NET_MODE.other_on_client)
+				# show nice alert (game mode should be synced by now)
+				if not Global.is_game_mode_open():
+					connect_info_panel.appear("joined as spectator (game already in progress)" )
+				else:
+					connect_info_panel.appear("joined lobby" )
+				
 			elif code == "P":
 				# host is sending the positions of all characters
 				var chars_pos_by_id = JSON.parse(message).result
@@ -104,37 +122,25 @@ func _physics_process(delta):
 #					dbline("id: "+ str(id) )
 					if chars_by_id.has(str(id)):
 						chars_by_id[str(id)].sync_position(chars_pos_by_id[str(id)])
-			elif code == "J":
-				# another client is joining, spawn his character
-				var char_data = JSON.parse(message).result
-				var spect_mode = not Global.is_game_mode_open()
-				if spect_mode == true:
-					connect_info_panel.appear("player "+char_data.name+" joined as spectator (game already in progress)" )
+			elif code == "A":
+				# host is sending the data for another client who joined, spawn his character
+				var new_data_with_id = JSON.parse(message).result
+				var idstring = new_data_with_id.keys()[0]
+				var new_char_data = new_data_with_id[idstring]
+				print(idstring)
+				print(new_char_data)
+				if new_char_data["active_mode"] == Global.ACTIVE_MODE.waiting_next_game:
+					connect_info_panel.appear("player "+new_char_data.name+" joined as spectator (game already in progress)" )
 				else:
-					connect_info_panel.appear("player "+char_data.name+" joined" )
-				# either correct data such as spect_mode based on gamemode, or just
-				#     scrap this and let host announce the new joining guy to everyone with corrected stats
-				#     TODO  
-				spawn_char(char_data, sender_id, NET_MODE.other_on_client)
+					connect_info_panel.appear("player "+new_char_data.name+" joined" )
+				spawn_char(new_char_data, idstring, NET_MODE.other_on_client)
+				
 			elif code == "G":
 				# host is starting a new game and sending game mode info
 				var new_game_info = JSON.parse(message).result
 				Global.update_game_info(new_game_info)
-				setup_chars_for_new_gamemode(false)
+				setup_chars_for_new_gamemode()
 				
-			# DELETE THIS TODO
-			elif code == "M":
-				# we joined mid-game so host is sending game mode info
-				var new_game_info = JSON.parse(message).result
-				Global.update_game_info(new_game_info)
-				own_char.spectator_mode = not Global.is_game_mode_open()
-				own_char.waiting_for_next_game = not Global.is_game_mode_open()
-				
-				if not Global.is_game_mode_open():
-					connect_info_panel.appear("joined as spectator (game already in progress)" )
-				else:
-					connect_info_panel.appear("joined lobby" )
-					
 				
 	# send packets
 	if host == true && connected == true:
@@ -160,7 +166,9 @@ func _physics_process(delta):
 func _connected(id):
 	_log("Signaling server connected with ID: %d" % id)
 
-
+func _disconnected():
+	_log("Signaling server disconnected")
+	
 
 
 func _lobby_joined(lobby):
@@ -187,12 +195,11 @@ func _mp_connected():
 	### on client side, function will run when joining the host's game. 
 	# set own character to own_on_client
 	own_char.net_mode = NET_MODE.own_on_client
-	# send own character data to everyone
-	client.rtc_mp.set_target_peer(client.rtc_mp.TARGET_PEER_BROADCAST)
+	# send own character data to HOST
+	client.rtc_mp.set_target_peer(1)
 	var own_data = own_char.get_character_data()
 	var jstr = JSON.print(own_data)
 	client.rtc_mp.put_packet(("J"+jstr).to_utf8())
-	# will receive data about characters on host (in _process)
 	connected = true
 	_log("Multiplayer is connected (I am %d)" % client.rtc_mp.get_unique_id())
 	emit_signal("joined_game")
@@ -204,6 +211,12 @@ func _mp_server_disconnect():
 
 
 func leave_game():
+	Global.game_mode = Global.GAME_MODE.lobby
+	setup_chars_for_new_gamemode()
+	# (setting up for lobby should include respawning if out of play and everything)
+	# also, it's kinda dumb to setup everyone just to remove them right after
+	# but whatever
+	
 	connected = false
 	# remove all remote chars
 	for k in chars_by_id.keys():
@@ -213,25 +226,18 @@ func leave_game():
 					chars_by_id.erase(k)
 				else:
 					chars_by_id.erase(k)
-	if host == true:
-		host = false
 	# ^ also remove self from the char list (since the id/key won't be 
 	# the same next time)
+	if host == true:
+		host = false
 	
 	own_char.net_mode = NET_MODE.own_on_host
-	Global.game_mode = Global.GAME_MODE.lobby
-	if own_char.spectator_mode == true:
-		own_char.respawn()
-	emit_signal("left_game")
 
-### for when a client joins mid-game
-func send_current_game_info():
-	var game_info = Global.get_game_info()
-	var jstr = JSON.print(game_info)
-	client.rtc_mp.put_packet(("M"+jstr).to_utf8())
+	emit_signal("left_game")
 
 
 func _mp_peer_connected(id: int):
+	# TODO delete this
 	### will run on host side whenever a client connects. 
 	
 	# actually do nothing. wait for the client to send info about his character,
@@ -284,22 +290,18 @@ func host_start_game():
 	client.rtc_mp.put_packet(("G"+jstr).to_utf8())
 	setup_chars_for_new_gamemode()
 
-func setup_chars_for_new_gamemode(joined_mid = false):
+func setup_chars_for_new_gamemode():
 	if Global.game_mode == Global.GAME_MODE.lobby:
 		for k in chars_by_id.keys():
 			# respawn the ones that were waiting
-#			if chars_by_id[k].spectator_mode == true:
+			if not chars_by_id[k].active_mode == Global.ACTIVE_MODE.playing:
 				chars_by_id[k].respawn()
-				# remove all gamemode-specific ui and shit
-				chars_by_id[k].hide_lives()
+			# remove all gamemode-specific ui and shit
+			chars_by_id[k].hide_lives()
 				
 	elif Global.game_mode == Global.GAME_MODE.elimination:
-		var new_elim_lives = Global.elimination_max_lives
 		for k in chars_by_id.keys():
-			if chars_by_id[k].waiting_for_next_game == true:
-				if joined_mid:
-					continue
-			chars_by_id[k].elim_lives = new_elim_lives
+			chars_by_id[k].elim_lives = Global.elimination_max_lives
 			chars_by_id[k].respawn()
 			chars_by_id[k].show_lives()
 
@@ -334,6 +336,7 @@ func spawn_char(char_data, owner_id, net_mode):
 		var character = CHARACTER.instance()
 		self.add_child(character)
 		character.set_character_data(char_data)
+		print(char_data)
 		character.net_mode = net_mode
 		character.control_mode = character.CONTROL_MODE.kbm_or_gamepad
 		chars_by_id[str(owner_id)] = character
@@ -385,17 +388,13 @@ func dbclear():
 
 
 func _input(event):
-	
-	if OS.is_debug_build():
-		if event.is_action_pressed("ui_debug"):
-			Global.online.dbline("vis "+str(Global.spect_label.get_parent().visible))
+	if event.is_action_pressed("ui_debug"):
+		if OS.is_debug_build():
+			dbline("game mode: "+str( Global.GAME_MODE.keys()[Global.game_mode] )+"\n")
+			for k in chars_by_id.keys():
+				dbline("   ID "+ str(k)+" NAME "+chars_by_id[k].base_name)
+				dbline("   pos: "+str( chars_by_id[k].get_node("body").global_position ))
 
-			
-	#		var label = get_tree().get_nodes_in_group("debug")[0]
-	#		label.text += "\n"
-	#		label.text += "CHARS:\n"
-	#		for k in chars_by_id.keys():
-	#			label.text += ("   ID "+ str(k)+" NAME "+chars_by_id[k].base_name)
-	#			label.text += (" visible: "+ str(chars_by_id[k].visible))
-	#			label.text += "\n"
+
+
 

@@ -71,23 +71,32 @@ utf8 packets.
 first letter is the code describing the message type.
 the rest is either JSON (to be converted to a Godot dict), or a string to be converted to floats.
 
+One-off:
+
 "J" + JSON. A client has just joined the host's game, and is sending the char_data of its own character as JSON.
-"H" + JSON. A client has just joined the host's game, and is the host sends him a JSON dict with all characters' 
-            data (except the client's one). the key is the player id, and the value is another dict with the char data.
-"P" + JSON. Host sends positions for all characters he has to everyone.
+
+"H" + JSON. A client has just joined the host's game, and is the host sends him a JSON dict with info about the game and the 
+            data for all characters.
+            
+"A" + JSON. The host sends this to all clients when "ANOTHER" client C joins, telling them to add C's character. 
+            C himself should ignore this message, since he gets all info he needs from he "H" message.
+            
+"G" + JSON. The host sends info about the game that is starting. the first field in the JSON is "mode" and is the name of the game mode. 
+            The other fields vary depending on the mode.
+
+Every frame:
+              
+"P" + JSON. Host sends positions for all characters he has to all clients.
             JSON: {id1: [hand_x, hand_y, body_x, body_y, target_x, target_y] , id2: [hand_x, hand_y, body_x, body_y, target_x, target_y] , ...}
             Note that that the IDs are strings, ex. "1", "87235", ecc.
+            Velocities for hand and body are also synced.
             
 "I" + JSON. A client is sending its input over to the host. not really an input, more of an input state.
             JSON: an array of ints and floats.
             [ move_x(-1,0,1), move_y(-1,0,1), attack(0,1), stance(INT), target_x(FLOAT), target_y(FLOAT) ]  
                     [0]             [1]            [2]          [3]           [4]             [5]
-"G" + JSON. The host sends info about the game that is starting. the first field in the JSON is "mode" and is the name of the game mode. 
-            The other fields vary depending on the mode.
 
-Note: the J and H packets are redundant, in the sense that if the host processes his J packet and sends the H before the 2nd client processes 
-his own J, then the second client will get two requests to spawn the first client's character. This is not a proble because I can just
-check chars_by_id.has(id) to avoid spawning duplicate characters. 
+
 
 
 ----- plan:
@@ -99,7 +108,7 @@ make it so the "H" packet also includes info about the game ("G") and other stuf
 make it so that when reading the "H" packet, all information gets synced:
     update the params of the client's already existing own char, 
     sync gamemode/max players, 
-    remove extra chars (this is not actually needed but just saying
+    remove extra chars (this is not actually needed but just saying)
 
 maybe change client-to-client "J" message, either have the host send it after reading the client-to-host "J"
     it might be fine as it is but needs some thinking 
@@ -107,12 +116,26 @@ maybe change client-to-client "J" message, either have the host send it after re
 
 remove "M" and just use "G" (or "H" ?) 
 
+  ----- all done
 
-
+     REDO THE SPECTATOR JAIL TP PART -- done
 
 
 
 ----- next: -------
+    
+    add reminder for waiting players
+    
+    purge useless "respawning" variable 
+    
+    cooler return button
+    
+    wins the game banner not well positioned for small screens
+
+    also change name and color if someone has the same (ctrlF this)
+
+    check that passing just "active_mode" in get_char_data is good
+
     add the "other stuff about the lobby like max players" to the "H" message (both send and receive)
 
     think about disabling the dragging stuff in hand.gd for chars on client

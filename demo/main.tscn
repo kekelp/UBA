@@ -26,7 +26,6 @@ base_name = "poggers"
 [node name="debug" type="Label" parent="CanvasLayer" groups=[
 "debug",
 ]]
-visible = false
 margin_left = 45.0
 margin_top = 111.0
 margin_right = 1158.0

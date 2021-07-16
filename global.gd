@@ -7,6 +7,9 @@ var max_players = 99
 var matchmatking_server_url = "ws://localhost:9080"
 #var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
 
+# shared enums
+enum ACTIVE_MODE {playing, respawning, waiting_next_game}
+
 enum GAME_MODE {lobby, elimination}
 
 # default mode (the one that you play if you click "start game"

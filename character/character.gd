@@ -11,10 +11,10 @@ export var free_swing = true
 var elim_lives = 5
 
 
-var char_id
+var char_id = 1
 
-enum ACTIVE_MODE {playing, respawning, waiting_next_game}
-var active_mode:int = ACTIVE_MODE.playing setget change_active_mode
+# the enum is defined in Global
+var active_mode:int = Global.ACTIVE_MODE.playing setget change_active_mode
 var spectating = false setget change_spectating
 
 enum NET_MODE {own_on_host, other_on_host, own_on_client, other_on_client}
@@ -101,7 +101,8 @@ var attack_disabled = false
 
 const YELLOW_BANG = preload("res://vfx/yellow-bang.tscn")
 
-var spectator_place = 1000000
+var spectator_num = 1000000
+var spectator_pos = Vector2(spectator_num, spectator_num)
 
 var overheat = 0
 
@@ -271,7 +272,7 @@ func _process(delta):
 	$body/g.rotation = -$body.rotation
 	
 	if spectating == false:
-		if $body.global_position.x < spectator_place - 500:
+		if $body.global_position.x < spectator_num - 500:
 			if $body.global_position.y < arena.get_node("die_top").global_position.y:
 				die()
 			elif $body.global_position.y > arena.get_node("die_bottom").global_position.y:
@@ -304,9 +305,9 @@ func die():
 			elim_lives -= 1
 			if elim_lives >= 1:
 				$RespawnTimer.start(respawn_wait_time)
-				change_active_mode(ACTIVE_MODE.respawning)
+				change_active_mode(Global.ACTIVE_MODE.respawning)
 			else:
-				change_active_mode(ACTIVE_MODE.waiting_next_game)
+				change_active_mode(Global.ACTIVE_MODE.waiting_next_game)
 				Global.online.check_winner()
 
 
@@ -384,11 +385,15 @@ func set_name(name):
 
 
 func respawn():
+	change_active_mode(Global.ACTIVE_MODE.playing)
+	respawning = false
+	
 	if self.is_in_group("owned"):
 		update_spect_label("", false)
 	
-	$body/g/UI/Label.text = str(elim_lives)
-	
+	if Global.game_mode == Global.GAME_MODE.elimination:
+		$body/g/UI/Label.text = str(elim_lives)
+		
 	# position is reset only on host. client characters will get 
 	# their position puppeted around by the host anyway
 	# BUT note that spectator mode has to be set to false at the end of 
@@ -402,15 +407,14 @@ func respawn():
 		var reset_pos = ( Vector2( rand_range(left_x, right_x)  , spw_y))
 		$body.teleport(reset_pos)
 		$hand.teleport(reset_pos)
-
-	change_active_mode(ACTIVE_MODE.playing)
-	respawning = false
 	
 	self.damage_taken = almost_zero
 	self.update_damage_debuff()
 
 
-
+func go_to_spectator_jail():
+	$body.teleport(spectator_pos)
+	$hand.teleport(spectator_pos)
 
 
 func _on_RespawnTimer_timeout():
@@ -420,12 +424,13 @@ func get_character_data():
 	var c_data = {}
 	c_data.name = ($body/g/UI/name.text)
 	c_data.color = Color($body/g/Sprite.modulate).to_html()
+	c_data.active_mode = active_mode
 	return c_data.duplicate()
-
 
 func set_character_data(c_data):
 	set_name(c_data.name)
 	set_color(c_data.color)
+	change_active_mode(c_data.active_mode)
 
 func get_character_position():
 	var c_pos = []
@@ -473,16 +478,16 @@ func sync_position(c_pos):
 
 func change_active_mode(newval):
 	active_mode = newval
-	if newval == ACTIVE_MODE.respawning:
+	if newval == Global.ACTIVE_MODE.respawning:
 		if self.is_in_group("owned"):
 			if Global.game_mode != Global.GAME_MODE.lobby:
 				change_spectating(true)
 				update_spect_label("RESPAWNING...", true)
-	elif newval == ACTIVE_MODE.waiting_next_game:
+	elif newval == Global.ACTIVE_MODE.waiting_next_game:
 		change_spectating(true)
 		if self.is_in_group("owned"):
 			update_spect_label("WAITING FOR NEXT GAME...", true)
-	elif newval == ACTIVE_MODE.playing:
+	elif newval == Global.ACTIVE_MODE.playing:
 		change_spectating(false)
 		if self.is_in_group("owned"):
 			update_spect_label("", false)
@@ -493,15 +498,13 @@ func change_spectating(newval):
 		$body.gravity_scale = 0
 		self.visible = false
 		
-		self.global_position.x = spectator_place
-		self.global_position.y = spectator_place
+		go_to_spectator_jail()
 	
 	elif newval == false:
 		$body.gravity_scale = base_gravity
 		self.visible = true
 		
-		self.global_position.x = 0
-		self.global_position.y = 0
+
 
 #func change_spectator_mode(newval):
 #	spectator_mode = newval
@@ -509,8 +512,8 @@ func change_spectating(newval):
 #		$body.gravity_scale = 0
 #		self.visible = false
 #
-#		self.global_position.x = spectator_place
-#		self.global_position.y = spectator_place
+#		self.global_position.x = spectator_num
+#		self.global_position.y = spectator_num
 #
 #	elif newval == false:
 #		$body.gravity_scale = base_gravity
