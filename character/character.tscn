@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://character/custom_camera.gd" type="Script" id=1]
 [ext_resource path="res://character/hand.gd" type="Script" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://sprites/red-body.png" type="Texture" id=10]
 [ext_resource path="res://character/AI.gd" type="Script" id=11]
 [ext_resource path="res://sprites/heart.png" type="Texture" id=12]
+[ext_resource path="res://sprites/robot-1/color.png" type="Texture" id=13]
 
 [sub_resource type="PhysicsMaterial" id=1]
 bounce = 1.0
@@ -24,11 +25,6 @@ radius = 16.6596
 
 [sub_resource type="SpriteFrames" id=4]
 animations = [ {
-"frames": [ ExtResource( 8 ) ],
-"loop": true,
-"name": "grab",
-"speed": 0.0
-}, {
 "frames": [ ExtResource( 6 ) ],
 "loop": true,
 "name": "punch",
@@ -37,6 +33,11 @@ animations = [ {
 "frames": [ ExtResource( 7 ) ],
 "loop": true,
 "name": "grab_grip",
+"speed": 0.0
+}, {
+"frames": [ ExtResource( 8 ) ],
+"loop": true,
+"name": "grab",
 "speed": 0.0
 } ]
 
@@ -106,8 +107,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="SpriteColor" type="Sprite" parent="body/g"]
+modulate = Color( 1, 0, 0, 1 )
+position = Vector2( 1.5, -0.75 )
+rotation = 0.0875133
+scale = Vector2( 0.322, 0.322 )
+texture = ExtResource( 13 )
+normal_map = ExtResource( 13 )
+
 [node name="Sprite" type="Sprite" parent="body/g"]
-rotation = 0.290379
+rotation = 0.0881677
 scale = Vector2( 0.321541, 0.321541 )
 texture = ExtResource( 3 )
 

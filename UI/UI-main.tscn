@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://UI/navigation_button.gd" type="Script" id=1]
 [ext_resource path="res://UI/UI-main.gd" type="Script" id=2]
 [ext_resource path="res://UI/OptionButton.gd" type="Script" id=3]
 [ext_resource path="res://UI/cursor-opt-button.gd" type="Script" id=4]
+[ext_resource path="res://UI/white-icon.png" type="Texture" id=5]
 
 [sub_resource type="ButtonGroup" id=1]
 
@@ -203,7 +204,6 @@ margin_bottom = 653.0
 text = "RETURN"
 
 [node name="customize_vbox" type="VBoxContainer" parent="UI_main"]
-visible = false
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 479.0
@@ -211,10 +211,43 @@ margin_bottom = 1060.0
 custom_constants/separation = 40
 alignment = 1
 
-[node name="Name" type="LineEdit" parent="UI_main/customize_vbox"]
-margin_top = 27.0
-margin_right = 339.0
-margin_bottom = 51.0
+[node name="PanelContainer" type="PanelContainer" parent="UI_main/customize_vbox"]
+margin_top = 159.0
+margin_right = 459.0
+margin_bottom = 821.0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_main/customize_vbox/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 452.0
+margin_bottom = 655.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 435.0
+margin_bottom = 638.0
+custom_constants/separation = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer"]
+margin_right = 425.0
+margin_bottom = 42.0
+
+[node name="Label" type="Label" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer"]
+margin_right = 425.0
+margin_bottom = 14.0
+text = "NAME:"
+align = 1
+
+[node name="Name" type="LineEdit" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer"]
+margin_top = 18.0
+margin_right = 425.0
+margin_bottom = 42.0
+align = 1
 placeholder_text = "Enter name"
 caret_blink = true
 caret_blink_speed = 0.5
@@ -222,16 +255,94 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ColorPicker" type="ColorPicker" parent="UI_main/customize_vbox"]
-margin_left = 44.0
-margin_top = 135.0
-margin_right = 383.0
-margin_bottom = 597.0
+[node name="HBoxContainer" type="HBoxContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 62.0
+margin_right = 425.0
+margin_bottom = 146.0
+custom_constants/separation = 50
+alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 36.0
+margin_right = 187.0
+margin_bottom = 84.0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 144.0
+margin_bottom = 77.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 127.0
+margin_bottom = 60.0
+custom_constants/separation = 10
+alignment = 1
+
+[node name="Label" type="Label" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/HBoxContainer"]
+margin_top = 18.0
+margin_right = 57.0
+margin_bottom = 32.0
+text = "COLOR 1"
+align = 1
+
+[node name="TextureRectColor" type="TextureRect" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/HBoxContainer"]
+margin_left = 67.0
+margin_right = 117.0
+margin_bottom = 50.0
+texture = ExtResource( 5 )
+
+[node name="PanelContainer2" type="PanelContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 237.0
+margin_right = 388.0
+margin_bottom = 84.0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 144.0
+margin_bottom = 77.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 127.0
+margin_bottom = 60.0
+custom_constants/separation = 10
+alignment = 1
+
+[node name="Label" type="Label" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/MarginContainer/HBoxContainer"]
+margin_top = 18.0
+margin_right = 57.0
+margin_bottom = 32.0
+text = "COLOR 2"
+align = 1
+
+[node name="TextureRectColor2" type="TextureRect" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer2/MarginContainer/HBoxContainer"]
+margin_left = 67.0
+margin_right = 117.0
+margin_bottom = 50.0
+texture = ExtResource( 5 )
+
+[node name="ColorPicker" type="ColorPicker" parent="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 166.0
+margin_right = 425.0
+margin_bottom = 628.0
 
 [node name="back_button3" type="Button" parent="UI_main/customize_vbox"]
-margin_top = 593.0
-margin_right = 339.0
-margin_bottom = 613.0
+margin_top = 861.0
+margin_right = 459.0
+margin_bottom = 881.0
 text = "RETURN"
 
 [node name="training_vbox" type="VBoxContainer" parent="UI_main"]
@@ -255,10 +366,10 @@ __meta__ = {
 }
 
 [node name="ColorPicker" type="ColorPicker" parent="UI_main/training_vbox"]
-margin_left = 48.0
-margin_top = 139.0
-margin_right = 387.0
-margin_bottom = 601.0
+margin_left = 52.0
+margin_top = 143.0
+margin_right = 391.0
+margin_bottom = 605.0
 
 [node name="back_button3" type="Button" parent="UI_main/training_vbox"]
 margin_top = 593.0
@@ -352,8 +463,8 @@ text = "RETURN"
 [connection signal="text_changed" from="UI_main/online_vbox2/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer/room_code" to="UI_main" method="_on_room_code_text_changed"]
 [connection signal="pressed" from="UI_main/online_vbox2/PanelContainer2/MarginContainer/VBoxContainer/HBoxContainer/join_button" to="UI_main" method="_on_join_button_pressed"]
 [connection signal="pressed" from="UI_main/online_vbox2/back_button2" to="UI_main" method="_on_back_button_pressed"]
-[connection signal="text_changed" from="UI_main/customize_vbox/Name" to="UI_main" method="_on_Name_text_changed"]
-[connection signal="color_changed" from="UI_main/customize_vbox/ColorPicker" to="UI_main" method="_on_ColorPicker_color_changed"]
+[connection signal="text_changed" from="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/Name" to="UI_main" method="_on_Name_text_changed"]
+[connection signal="color_changed" from="UI_main/customize_vbox/PanelContainer/MarginContainer/VBoxContainer/ColorPicker" to="UI_main" method="_on_ColorPicker_color_changed"]
 [connection signal="pressed" from="UI_main/customize_vbox/back_button3" to="UI_main" method="_on_back_button_pressed"]
 [connection signal="text_changed" from="UI_main/training_vbox/Name" to="UI_main" method="_on_Name_text_changed"]
 [connection signal="color_changed" from="UI_main/training_vbox/ColorPicker" to="UI_main" method="_on_ColorPicker_color_changed"]

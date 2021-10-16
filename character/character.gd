@@ -42,9 +42,6 @@ var moving_left: bool = false
 var moving_up: bool = false
 var moving_down: bool = false
 
-export var base_color: Color = Color(0.8, 0.7, 3.0)
-
-export var base_name = "defaultfrog #12"
 var dead = false
 
 
@@ -376,12 +373,13 @@ func update_damage_debuff():
 
 
 func set_color(color: Color):
-	self.base_color = color
-	$body/g/Sprite.modulate = color
+	$body/g/Sprite.modulate = color.lightened(0.5)
 	$hand/g/Sprite.modulate = color.lightened(0.5)
-	
+
+func set_color2(color: Color):
+	$body/g/SpriteColor.modulate = color
+
 func set_name(name):
-	self.base_name = name
 	$body/g/UI/name.text = name
 
 
@@ -424,13 +422,15 @@ func _on_RespawnTimer_timeout():
 func get_character_data():
 	var c_data = {}
 	c_data.name = ($body/g/UI/name.text)
-	c_data.color = Color($body/g/Sprite.modulate).to_html()
+	c_data.color = $body/g/Sprite.modulate.to_html()
+	c_data.color2 = $body/g/SpriteColor.modulate.to_html()
 	c_data.active_mode = active_mode
 	return c_data.duplicate()
 
 func set_character_data(c_data):
 	set_name(c_data.name)
-	set_color(c_data.color)
+	set_color(Color(c_data.color))
+	set_color2(Color(c_data.color))
 	change_active_mode(c_data.active_mode)
 
 func get_character_position():

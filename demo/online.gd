@@ -36,7 +36,7 @@ func _ready():
 #	dbclear()
 #	dbline(str(Engine.get_frames_per_second()))
 
-func _process(delta):
+func _physics_process(delta):
 #	for k in chars_by_id.keys():
 #		print(chars_by_id[k], " ", chars_by_id[k].elim_lives)
 	

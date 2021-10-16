@@ -20,7 +20,6 @@ z_index = -99
 "owned",
 ] instance=ExtResource( 1 )]
 position = Vector2( 546.182, 510.257 )
-base_name = "poggers"
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

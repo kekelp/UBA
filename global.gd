@@ -1,9 +1,9 @@
 extends Node
 
-var character_color: Color setget color_change
-var character_name = "anonymous" setget name_change
+
 var room_code
 var max_players = 99
+
 #var matchmatking_server_url = "ws://localhost:9080"
 var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
 
@@ -35,16 +35,24 @@ var current_ui = CURRENT_UI.MAIN
 onready var own_char = get_tree().get_nodes_in_group("owned")[0]
 onready var online = get_tree().get_nodes_in_group("online")[0]
 
+onready var own_char_data = own_char.get_character_data()
 
-func color_change(newcol):
+func change_char_color(newcol):
+	own_char_data.color = newcol
 	own_char.set_color(newcol)
 
-func name_change(newname):
+func change_char_color2(newcol):
+	own_char_data.color2 = newcol
+	own_char.set_color2(newcol)
+
+func change_char_name(newname):
+	own_char_data.name = newname
 	own_char.set_name(newname)
 
 func set_random_name():
 	randomize()
 	var rand_name = "anonymous"+str(int(rand_range(0,9)))+str(int(rand_range(0,9)))+str(int(rand_range(0,9)))
+	own_char_data.name = rand_name
 	own_char.set_name(rand_name)
 
 func set_random_color():
