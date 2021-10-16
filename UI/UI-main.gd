@@ -6,7 +6,9 @@ onready var nav_history = [$root_vbox]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	for vbox in get_children():
+		vbox.visible = false
+	$root_vbox.visible = true
 
 func nav_to_child_subm(new_subm):
 	nav_history[-1].visible = false
@@ -44,3 +46,7 @@ func _on_join_button_pressed():
 
 func _on_max_players_spinbox_value_changed(value):
 	Global.max_players = value
+
+
+func _on_quit_button_pressed():
+	get_tree().notification(MainLoop.NOTIFICATION_WM_QUIT_REQUEST)

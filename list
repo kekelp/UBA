@@ -78,6 +78,8 @@ One-off:
 "H" + JSON. A client has just joined the host's game, and is the host sends him a JSON dict with info about the game and the 
             data for all characters.
             
+"N". Connection to host denied. 
+            
 "A" + JSON. The host sends this to all clients when "ANOTHER" client C joins, telling them to add C's character. 
             C himself should ignore this message, since he gets all info he needs from he "H" message.
             
@@ -123,7 +125,17 @@ remove "M" and just use "G" (or "H" ?)
 
 
 ----- next: -------
+
+    when host disconnects, clients don't always get the memo
     
+    when host disconnects and clients don't get the memo OR in any situation where the position sync packets
+        stop coming, the hands start going crazy and NAN out
+    
+    max players should reset to default when leaving game?
+    
+    input sticking for that guy -- probably fine
+    
+    make input symmetric for left/right
     
     purge useless "respawning" variable 
     
@@ -135,9 +147,10 @@ remove "M" and just use "G" (or "H" ?)
 
     add the "other stuff about the lobby like max players" to the "H" message (both send and receive) --this is useless 
 
-    redo lobby sealing
+    redo lobby sealing:
+        move 	emit_signal("joined_game")  to when client receives the "H" message
+        make it so when replying to the new client's "J" message, host checks if lobby is full at kicks out the client 
 
-    input sticking for that guy
 
 
     add reminder for waiting players

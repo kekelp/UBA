@@ -46,7 +46,6 @@ export var base_color: Color = Color(0.8, 0.7, 3.0)
 
 export var base_name = "defaultfrog #12"
 var dead = false
-var respawning = false
 
 
 #################################### stats/parameters
@@ -154,12 +153,12 @@ func _ready():
 # now useless...
 func change_net_mode(newval):
 	net_mode = newval
-	if newval == NET_MODE.own_on_client or newval == NET_MODE.other_on_client:
-		$body.mode = RigidBody2D.MODE_RIGID
-		$hand.mode = RigidBody2D.MODE_RIGID
-	else:
-		$body.mode = RigidBody2D.MODE_RIGID
-		$hand.mode = RigidBody2D.MODE_RIGID
+#	if newval == NET_MODE.own_on_client or newval == NET_MODE.other_on_client:
+#		$body.mode = RigidBody2D.MODE_RIGID
+#		$hand.mode = RigidBody2D.MODE_RIGID
+#	else:
+#		$body.mode = RigidBody2D.MODE_RIGID
+#		$hand.mode = RigidBody2D.MODE_RIGID
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -267,6 +266,8 @@ func _physics_process(delta):
 
 
 func _process(delta):
+	Global.online.dbclear()
+	Global.online.dbline("active_mode "+str(Global.ACTIVE_MODE.keys()[active_mode]))
 
 	# fix body rotation
 	$body/g.rotation = -$body.rotation
@@ -385,8 +386,8 @@ func set_name(name):
 
 
 func respawn():
+	Global.online.dbline("respresprespresprespresprespresprespresp")
 	change_active_mode(Global.ACTIVE_MODE.playing)
-	respawning = false
 	
 	if self.is_in_group("owned"):
 		update_spect_label("", false)
@@ -479,9 +480,9 @@ func sync_position(c_pos):
 func change_active_mode(newval):
 	active_mode = newval
 	if newval == Global.ACTIVE_MODE.respawning:
-		if self.is_in_group("owned"):
-			if Global.game_mode != Global.GAME_MODE.lobby:
-				change_spectating(true)
+		if Global.game_mode != Global.GAME_MODE.lobby:
+			change_spectating(true)
+			if self.is_in_group("owned"):
 				update_spect_label("RESPAWNING...", true)
 	elif newval == Global.ACTIVE_MODE.waiting_next_game:
 		change_spectating(true)
@@ -498,11 +499,16 @@ func change_spectating(newval):
 		$body.gravity_scale = 0
 		self.visible = false
 		
+		$body.mode = RigidBody2D.MODE_STATIC
+		$hand.mode = RigidBody2D.MODE_STATIC
 		go_to_spectator_jail()
-	
+		
 	elif newval == false:
 		$body.gravity_scale = base_gravity
 		self.visible = true
+		
+		$body.mode = RigidBody2D.MODE_RIGID
+		$hand.mode = RigidBody2D.MODE_RIGID
 		
 
 
@@ -551,3 +557,8 @@ func show_lives():
 #			if self.is_in_group("owned"):
 #				$hand.teleport(tvec)
 
+func change_menu_rect(new_menu):
+	if new_menu == true:
+		$body/g/Sprite/custom_camera.change_menu_rect(new_menu)
+	else:
+		$body/g/Sprite/custom_camera.change_menu_rect(new_menu)

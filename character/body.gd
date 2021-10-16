@@ -10,8 +10,9 @@ func _ready():
 	pass
 
 func _process(_delta):
-	$g.rotation = -self.rotation
-
+#	print(self.rotation_degrees)
+#	$g.rotation = -self.rotation
+	pass
 
 func _integrate_forces(state):
 	if should_reset == true:

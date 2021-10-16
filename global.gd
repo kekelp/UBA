@@ -4,8 +4,8 @@ var character_color: Color setget color_change
 var character_name = "anonymous" setget name_change
 var room_code
 var max_players = 99
-var matchmatking_server_url = "ws://localhost:9080"
-#var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
+#var matchmatking_server_url = "ws://localhost:9080"
+var matchmatking_server_url = "ws://still-basin-28484.herokuapp.com:80"
 
 # shared enums
 enum ACTIVE_MODE {playing, respawning, waiting_next_game}
@@ -83,6 +83,7 @@ func switch_to_host_ui():
 		current_ui_ref = l_host_ui
 		current_ui_ref.set_room_code(room_code)
 		current_ui = CURRENT_UI.HOST
+	own_char.change_menu_rect(false)
 
 func switch_to_client_ui():
 	if current_ui != CURRENT_UI.CLIENT:
@@ -92,6 +93,7 @@ func switch_to_client_ui():
 		current_ui_ref = l_client_ui
 		current_ui_ref.set_room_code(room_code)
 		current_ui = CURRENT_UI.CLIENT
+	own_char.change_menu_rect(false)
 
 func switch_to_main_ui():
 	if current_ui != CURRENT_UI.MAIN:
@@ -100,6 +102,7 @@ func switch_to_main_ui():
 		self.add_child(l_main_ui)
 		current_ui_ref = l_main_ui
 		current_ui = CURRENT_UI.MAIN
+	own_char.change_menu_rect(true)
 
 
 func _on_online_created_game():
@@ -164,3 +167,7 @@ func game_mode_changed(new_mode):
 	if new_mode == GAME_MODE.elimination:
 		get_tree().get_nodes_in_group("UI_gamemode")[0].text = "ELIMINATION"
 
+
+func _notification(what):
+	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+		get_tree().quit() # default behavior

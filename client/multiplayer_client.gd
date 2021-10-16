@@ -86,7 +86,7 @@ func peer_disconnected(id):
 	if rtc_mp.has_peer(id): rtc_mp.remove_peer(id)
 
 
-func offer_received(id, offer)	:
+func offer_received(id, offer):
 	print("Got offer: %d" % id)
 	if rtc_mp.has_peer(id):
 		rtc_mp.get_peer(id).connection.set_remote_description("offer", offer)

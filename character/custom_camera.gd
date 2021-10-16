@@ -22,6 +22,16 @@ var deadzone_x = 20
 var deadzone_y_down = 0
 var deadzone_y_up
 
+var mouse_move_rect_ratio_menu = Vector2(0.7, 1.0)
+var mouse_move_rect_ratio_normal = Vector2(1.0, 1.0)
+var mouse_move_rect_ratio = mouse_move_rect_ratio_menu
+
+func change_menu_rect(new_menu):
+	if new_menu == true:
+		mouse_move_rect_ratio = mouse_move_rect_ratio_menu
+	else:
+		mouse_move_rect_ratio = mouse_move_rect_ratio_normal
+
 onready var character = get_parent().get_parent().get_parent()
 # the correct pos to follow is not the character's but the character's sprite
 onready var character_pos = get_parent()
@@ -53,12 +63,23 @@ func window_resized():
 func _process(delta):
 	if is_own():
 		var ctrans = get_canvas_transform()
-		var min_pos = -ctrans.get_origin() / ctrans.get_scale()
-		var view_size = get_viewport_rect().size / ctrans.get_scale()
-		var max_pos = min_pos + view_size
+		
+		var rect = get_viewport_rect().size / ctrans.get_scale()
+		rect = rect * mouse_move_rect_ratio
+		
+		var center = Vector2( rect.x/2, rect.y/2)
+		
+		
+		var a = get_viewport().get_mouse_position()
+		a.x = clamp(a.x, 0, rect.x)
+		a.y = clamp(a.y, 0, rect.y)
+		var mouse_offcenter = (a - center)/rect *2
+#		var mouse_offcenter = get_viewport().get_mouse_position()*2/rect - (Vector2(1.0,1.0))
+#		var mouse_offcenter = get_viewport().get_mouse_position()/rect - (Vector2(1.0,1.0))
 
-		var mouse_offcenter = get_viewport().get_mouse_position()*2/view_size - (Vector2(1.0,1.0))
-
+#		print("poggers, ", mouse_offcenter)
+		
+		
 		var time_number = 3
 		var smoothing_time_seconds = 0.06
 		var almost_three
@@ -69,9 +90,9 @@ func _process(delta):
 		
 		var previous_frame_view_x = Viewport.get_canvas_transform().get_origin().x
 		var previous_frame_view_y = Viewport.get_canvas_transform().get_origin().y
-
-		var uncorr_target_x = -(character_pos.global_position.x - get_viewport().size.x/2)
-	
+		
+		var uncorr_target_x = -(character_pos.global_position.x - rect.x/2)
+		
 		if character.get_parent().spectating == false:
 			# deadzone
 			var uncorr_x_diff = uncorr_target_x - previous_frame_view_x
@@ -79,9 +100,9 @@ func _process(delta):
 				target_x = min(uncorr_target_x + deadzone_x, previous_frame_view_x)
 			else: # uncorr_x_diff >= 0:
 				target_x = max(uncorr_target_x - deadzone_x, previous_frame_view_x)
-
-
-			var uncorr_target_y = -(character_pos.global_position.y - get_viewport().size.y/2)
+			
+			
+			var uncorr_target_y = -(character_pos.global_position.y - rect.y/2)
 			var uncorr_y_diff = uncorr_target_y - previous_frame_view_y
 			if uncorr_y_diff < 0:
 				target_y = min(uncorr_target_y + deadzone_y_down, previous_frame_view_y)
@@ -90,7 +111,8 @@ func _process(delta):
 		
 			# mouse correction
 			var signum = sign(mouse_offcenter.x)
-			var target_x_mouse_corr = (pow(abs(mouse_offcenter.x), 1.5)*view_size.x*0.27)
+			var target_x_mouse_corr = (pow(abs(mouse_offcenter.x), 1.5)*rect.x*0.27)
+
 			target_x -= signum *target_x_mouse_corr
 		
 		else: # if character.spectating == true:
@@ -108,8 +130,8 @@ func _process(delta):
 #			var target_x_mouse_corr = (pow(abs(mouse_offcenter.x), 1.5)*view_size.x*0.27)
 #			target_x -= signum *target_x_mouse_corr
 				
-
-
+		
+		
 		# wall bounding
 		if -target_y > bound_down:
 			target_y = - (bound_down)   # don't drag
@@ -119,8 +141,8 @@ func _process(delta):
 			target_x = - (bound_right)   # don't drag
 		if -target_x < bound_left:
 			target_x = - (bound_left)   # don't drag
-
-
+		
+		
 		var x_diff = target_x - previous_frame_view_x
 		
 		var y_diff = target_y - previous_frame_view_y

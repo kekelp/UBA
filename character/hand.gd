@@ -41,8 +41,8 @@ func _integrate_forces(state):
 		should_reset = false
 	if should_drag:
 		var drag_return_vec: Vector2 = $"../body".global_position - self.global_position
-		if (get_parent().net_mode == get_parent().NET_MODE.own_on_host || get_parent().net_mode == get_parent().NET_MODE.other_on_host ):
-			state.transform.origin += drag_return_vec*drag_amount*get_parent().physics_proc_delta
+#		if (get_parent().net_mode == get_parent().NET_MODE.own_on_host || get_parent().net_mode == get_parent().NET_MODE.other_on_host ):
+		state.transform.origin += drag_return_vec*drag_amount*get_parent().physics_proc_delta
 	
 	var total_force = (punch_force) * mass *0.5
 	set_applied_force(total_force)

@@ -36,9 +36,9 @@ custom_constants/separation = 40
 alignment = 1
 
 [node name="online_button" type="Button" parent="UI_main/root_vbox"]
-margin_top = 450.0
+margin_top = 420.0
 margin_right = 459.0
-margin_bottom = 470.0
+margin_bottom = 440.0
 text = "PLAY ONLINE"
 script = ExtResource( 1 )
 child_menu = NodePath("../../online_vbox2")
@@ -53,20 +53,26 @@ script = ExtResource( 1 )
 child_menu = NodePath("../../training_vbox")
 
 [node name="customize_button" type="Button" parent="UI_main/root_vbox"]
-margin_top = 510.0
+margin_top = 480.0
 margin_right = 459.0
-margin_bottom = 530.0
+margin_bottom = 500.0
 text = "CUSTOMIZE"
 script = ExtResource( 1 )
 child_menu = NodePath("../../customize_vbox")
 
 [node name="options_button" type="Button" parent="UI_main/root_vbox"]
-margin_top = 570.0
+margin_top = 540.0
 margin_right = 459.0
-margin_bottom = 590.0
+margin_bottom = 560.0
 text = "OPTIONS"
 script = ExtResource( 1 )
 child_menu = NodePath("../../options_vbox")
+
+[node name="quit_button" type="Button" parent="UI_main/root_vbox"]
+margin_top = 600.0
+margin_right = 459.0
+margin_bottom = 620.0
+text = "QUIT"
 
 [node name="online_vbox2" type="VBoxContainer" parent="UI_main"]
 visible = false
@@ -217,10 +223,10 @@ __meta__ = {
 }
 
 [node name="ColorPicker" type="ColorPicker" parent="UI_main/customize_vbox"]
-margin_left = 40.0
-margin_top = 131.0
-margin_right = 379.0
-margin_bottom = 593.0
+margin_left = 44.0
+margin_top = 135.0
+margin_right = 383.0
+margin_bottom = 597.0
 
 [node name="back_button3" type="Button" parent="UI_main/customize_vbox"]
 margin_top = 593.0
@@ -249,10 +255,10 @@ __meta__ = {
 }
 
 [node name="ColorPicker" type="ColorPicker" parent="UI_main/training_vbox"]
-margin_left = 44.0
-margin_top = 135.0
-margin_right = 383.0
-margin_bottom = 597.0
+margin_left = 48.0
+margin_top = 139.0
+margin_right = 387.0
+margin_bottom = 601.0
 
 [node name="back_button3" type="Button" parent="UI_main/training_vbox"]
 margin_top = 593.0
@@ -339,6 +345,7 @@ margin_right = 459.0
 margin_bottom = 592.0
 text = "RETURN"
 
+[connection signal="pressed" from="UI_main/root_vbox/quit_button" to="UI_main" method="_on_quit_button_pressed"]
 [connection signal="changed" from="UI_main/online_vbox2/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/max_players_spinbox" to="UI_main" method="_on_max_players_spinbox_changed"]
 [connection signal="value_changed" from="UI_main/online_vbox2/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/max_players_spinbox" to="UI_main" method="_on_max_players_spinbox_value_changed"]
 [connection signal="pressed" from="UI_main/online_vbox2/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/create_button" to="UI_main" method="_on_create_button_pressed"]

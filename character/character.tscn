@@ -2,7 +2,7 @@
 
 [ext_resource path="res://character/custom_camera.gd" type="Script" id=1]
 [ext_resource path="res://character/hand.gd" type="Script" id=2]
-[ext_resource path="res://sprites/b-body.png" type="Texture" id=3]
+[ext_resource path="res://sprites/robot-1/main.png" type="Texture" id=3]
 [ext_resource path="res://character/character.gd" type="Script" id=4]
 [ext_resource path="res://character/body.gd" type="Script" id=5]
 [ext_resource path="res://sprites/punch.png" type="Texture" id=6]
@@ -17,13 +17,18 @@
 bounce = 1.0
 
 [sub_resource type="CircleShape2D" id=2]
-radius = 41.9145
+radius = 46.0109
 
 [sub_resource type="CircleShape2D" id=3]
 radius = 16.6596
 
 [sub_resource type="SpriteFrames" id=4]
 animations = [ {
+"frames": [ ExtResource( 8 ) ],
+"loop": true,
+"name": "grab",
+"speed": 0.0
+}, {
 "frames": [ ExtResource( 6 ) ],
 "loop": true,
 "name": "punch",
@@ -32,11 +37,6 @@ animations = [ {
 "frames": [ ExtResource( 7 ) ],
 "loop": true,
 "name": "grab_grip",
-"speed": 0.0
-}, {
-"frames": [ ExtResource( 8 ) ],
-"loop": true,
-"name": "grab",
 "speed": 0.0
 } ]
 
@@ -107,7 +107,8 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="body/g"]
-scale = Vector2( 0.421587, 0.421587 )
+rotation = 0.290379
+scale = Vector2( 0.321541, 0.321541 )
 texture = ExtResource( 3 )
 
 [node name="custom_camera" type="Node2D" parent="body/g/Sprite"]

@@ -27,7 +27,7 @@ motion_scale = Vector2( 0.25, 1 )
 
 [node name="background" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
 modulate = Color( 0.88, 0.88, 0.88, 1 )
-position = Vector2( 966.054, 323.077 )
+position = Vector2( 1205.86, 307.975 )
 texture = ExtResource( 1 )
 region_rect = Rect2( 0, 0, 20000, 1080 )
 
@@ -36,7 +36,7 @@ motion_scale = Vector2( 0.44, 1 )
 
 [node name="Sprite6" type="Sprite" parent="ParallaxBackground/ParallaxLayer6"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( 3510.25, 900.733 )
+position = Vector2( 3510.25, 811.838 )
 scale = Vector2( 0.454358, 0.454358 )
 texture = ExtResource( 10 )
 region_enabled = true
@@ -47,7 +47,7 @@ motion_scale = Vector2( 0.48, 1 )
 
 [node name="Sprite5" type="Sprite" parent="ParallaxBackground/ParallaxLayer5"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( 1132.19, 971.67 )
+position = Vector2( 1132.19, 882.775 )
 scale = Vector2( -0.543, 0.543 )
 texture = ExtResource( 9 )
 region_enabled = true
@@ -58,7 +58,7 @@ motion_scale = Vector2( 0.5, 1 )
 
 [node name="Sprite4" type="Sprite" parent="ParallaxBackground/ParallaxLayer4"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( 1346.1, 981.357 )
+position = Vector2( 1346.1, 892.462 )
 scale = Vector2( 0.704531, 0.704531 )
 texture = ExtResource( 4 )
 region_enabled = true
@@ -66,7 +66,7 @@ region_rect = Rect2( 0, 0, 20000, 2000 )
 
 [node name="Sprite5" type="Sprite" parent="ParallaxBackground/ParallaxLayer4"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( 1188.96, 1134.01 )
+position = Vector2( 1188.96, 1045.12 )
 scale = Vector2( 0.704531, 0.704531 )
 texture = ExtResource( 4 )
 region_enabled = true
@@ -74,7 +74,7 @@ region_rect = Rect2( 0, 0, 20000, 2000 )
 
 [node name="Sprite6" type="Sprite" parent="ParallaxBackground/ParallaxLayer4"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( 1570.59, 1134.01 )
+position = Vector2( 1570.59, 1045.12 )
 scale = Vector2( 0.704531, 0.704531 )
 texture = ExtResource( 4 )
 region_enabled = true
@@ -85,7 +85,7 @@ motion_scale = Vector2( 0.55, 1 )
 
 [node name="Sprite3" type="Sprite" parent="ParallaxBackground/ParallaxLayer3"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( -200.151, 1119.05 )
+position = Vector2( -200.151, 1030.16 )
 scale = Vector2( 0.986835, 0.986835 )
 texture = ExtResource( 7 )
 region_enabled = true
@@ -108,7 +108,7 @@ motion_scale = Vector2( 0.66, 1 )
 
 [node name="Sprite1" type="Sprite" parent="ParallaxBackground/ParallaxLayer1"]
 modulate = Color( 0.901961, 0.901961, 0.901961, 1 )
-position = Vector2( 1075.63, 490.586 )
+position = Vector2( 1075.63, 401.691 )
 scale = Vector2( 0.898139, 0.898139 )
 texture = ExtResource( 5 )
 region_enabled = true

@@ -14,6 +14,7 @@
 
 [node name="Arena" parent="." instance=ExtResource( 4 )]
 position = Vector2( 0, 192.55 )
+z_index = -99
 
 [node name="baj" parent="." groups=[
 "owned",
@@ -26,6 +27,7 @@ base_name = "poggers"
 [node name="debug" type="Label" parent="CanvasLayer" groups=[
 "debug",
 ]]
+visible = false
 margin_left = 45.0
 margin_top = 111.0
 margin_right = 1158.0
